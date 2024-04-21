@@ -9,4 +9,5 @@ Use this to syndicate Mastodon posts to your own site. See IndieWeb's guide on [
 - [x] Fetch Mastodon posts
 - [ ] Support filtering posts using Mastodon's [query parameters](https://docs.joinmastodon.org/methods/accounts/#query-parameters)
 - [x] Save posts to files
-- [ ] Transform HTML to Markdown
+- [x] Transform HTML to Markdown
+- [x] Show embedded images

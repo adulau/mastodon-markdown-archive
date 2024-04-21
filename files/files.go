@@ -3,6 +3,7 @@ package files
 import (
 	"fmt"
 	"git.hq.ggpsv.com/gabriel/mastodon-pesos/client"
+	md "github.com/JohannesKaufmann/html-to-markdown"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -14,9 +15,8 @@ type FileWriter struct {
 }
 
 type TemplateContext struct {
-	Post    client.Post
-	Content string
-	Replies []client.Post
+	Post        client.Post
+	Descendants []client.Post
 }
 
 func New(dir string) (FileWriter, error) {
@@ -39,48 +39,51 @@ func New(dir string) (FileWriter, error) {
 	}, nil
 }
 
-func (f FileWriter) Write(post client.Post) {
+func (f FileWriter) Write(post client.Post) error {
 	tpmlFilename := "templates/post.tmpl"
 	tmplFile, err := filepath.Abs(tpmlFilename)
 
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("error resolving template absolute path: %w", err)
 	}
 
 	if post.InReplyToId != "" {
 		f.repies[post.InReplyToId] = post
-		return
+		return nil
 	}
 
 	var descendants []client.Post
 	f.getReplies(post.Id, &descendants)
-
-	tmpl, err := template.New(filepath.Base(tpmlFilename)).ParseFiles(tmplFile)
-
-	if err != nil {
-		panic(err)
-	}
 
 	name := fmt.Sprintf("%s.md", post.Id)
 	filename := filepath.Join(f.dir, name)
 	file, err := os.Create(filename)
 
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("error creating file: %w", err)
 	}
 
 	defer file.Close()
 
+	converter := md.NewConverter("", true, nil)
+
+	funcs := template.FuncMap{
+		"tomd": converter.ConvertString,
+	}
+
+	tmpl, err := template.New(filepath.Base(tpmlFilename)).Funcs(funcs).ParseFiles(tmplFile)
+
 	context := TemplateContext{
-		Post:    post,
-		Content: post.Content,
-		Replies: descendants,
+		Post:        post,
+		Descendants: descendants,
 	}
 	err = tmpl.Execute(file, context)
 
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("error executing template: %w", err)
 	}
+
+	return nil
 }
 
 func (f FileWriter) getReplies(postId string, replies *[]client.Post) {

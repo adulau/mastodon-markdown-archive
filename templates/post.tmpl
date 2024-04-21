@@ -3,11 +3,24 @@ date: {{ .Post.CreatedAt }}
 post_url: {{ .Post.URI }}
 post_ids:
 - {{ .Post.Id }}
-{{- range .Replies }}
+{{- range .Descendants }}
 - {{ .Id }}
 {{- end }}
 ---
-{{ .Content }}
-{{ range .Replies }}
-{{ .Content }}
-{{ end }}
+
+{{ .Post.Content | tomd }}
+
+{{ range .Post.MediaAttachments }}
+	{{- if eq .Type "image" -}}
+![{{ .Description }}]({{ .Url }})
+	{{ end }}
+{{- end -}}
+
+{{- range .Descendants }}
+{{ .Content | tomd -}}
+	{{ range .MediaAttachments }}
+		{{- if eq .Type "image" -}}
+![{{ .Description }}]({{ .Url }})
+		{{ end }}
+	{{- end -}}
+{{- end -}}
