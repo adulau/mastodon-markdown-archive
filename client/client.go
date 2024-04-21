@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -35,6 +36,13 @@ type Post struct {
 	MediaAttachments []MediaAttachment `json:"media_attachments"`
 }
 
+type PostsFilter struct {
+	ExcludeReplies bool
+	ExcludeReblogs bool
+	Limit          int
+	SinceId        string
+}
+
 func New(userURL string) (Client, error) {
 	var client Client
 	parsedURL, err := url.Parse(userURL)
@@ -53,7 +61,7 @@ func New(userURL string) (Client, error) {
 	}, nil
 }
 
-func (c Client) GetPosts(params string) ([]Post, error) {
+func (c Client) GetPosts(filter PostsFilter) ([]Post, error) {
 	var posts []Post
 	account, err := c.getAccount()
 
@@ -61,11 +69,29 @@ func (c Client) GetPosts(params string) ([]Post, error) {
 		return posts, err
 	}
 
+	queryValues := url.Values{}
+
+	if filter.ExcludeReplies {
+		queryValues.Add("exclude_replies", strconv.Itoa(1))
+	}
+
+	if filter.ExcludeReblogs {
+		queryValues.Add("exclude_reblogs", strconv.Itoa(1))
+	}
+
+	if filter.SinceId != "" {
+		queryValues.Add("since_id", filter.SinceId)
+	}
+
+	queryValues.Add("limit", strconv.Itoa(filter.Limit))
+
+	query := fmt.Sprintf("?%s", queryValues.Encode())
+
 	postsUrl := fmt.Sprintf(
 		"%s/api/v1/accounts/%s/statuses/%s",
 		c.baseURL,
 		account.Id,
-		params,
+		query,
 	)
 
 	if err := get(postsUrl, &posts); err != nil {
