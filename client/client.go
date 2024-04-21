@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -93,6 +94,8 @@ func (c Client) GetPosts(filter PostsFilter) ([]Post, error) {
 		account.Id,
 		query,
 	)
+
+	log.Println(fmt.Sprintf("Fetching posts from %s", postsUrl))
 
 	if err := get(postsUrl, &posts); err != nil {
 		return posts, err

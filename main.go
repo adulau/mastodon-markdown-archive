@@ -6,6 +6,7 @@ import (
 	"git.hq.ggpsv.com/gabriel/mastodon-pesos/client"
 	"git.hq.ggpsv.com/gabriel/mastodon-pesos/files"
 	"log"
+	"os"
 )
 
 func main() {
@@ -15,6 +16,7 @@ func main() {
 	excludeReblogs := flag.Bool("exclude-reblogs", false, "Whether or not to exclude reblogs")
 	limit := flag.Int("limit", 40, "Maximum number of posts to fetch")
 	sinceId := flag.String("since-id", "", "Fetch only posts made since passed post id")
+	persist := flag.Bool("persist", false, "Persist most recent post id to /tmp/mastodon-pesos-fid")
 
 	flag.Parse()
 
@@ -41,10 +43,19 @@ func main() {
 		log.Panicln(err)
 	}
 
+	log.Println(fmt.Sprintf("Fetched %d posts", len(posts)))
+
 	for _, post := range posts {
 		if err := fileWriter.Write(post); err != nil {
 			log.Panicln("error writing post to file: %w", err)
 			break
 		}
+	}
+
+	if *persist && len(posts) > 0 {
+		lastPost := posts[0]
+
+		fid := []byte(lastPost.Id)
+		os.WriteFile("/tmp/mastodon-pesos-fid", fid, 0644)
 	}
 }
