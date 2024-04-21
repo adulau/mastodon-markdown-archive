@@ -1,6 +1,6 @@
 # Mastodon PESOS
 
-Fetch a Mastodon account's posts and save them as Markdown files. Posts are transformed to Markdown, images are inlined, and replies are threaded.
+Fetch a Mastodon account's posts and save them as Markdown files. Posts are transformed to Markdown, images are inlined, and replies are threaded. Implements most of the parameters in Mastodon's [API to get account's statuses](https://docs.joinmastodon.org/methods/accounts/#statuses). 
 
 For the time being this formats the files with [Hugo](https://gohugo.io) front-matter.
 
@@ -10,17 +10,21 @@ I use this small tool to create an archive of my Mastodon posts, which I then [s
 ```
 Usage of ./mastodon-pesos:
   -dist string
-        Path to directory where files will be written
+        Path to directory where files will be written (default "./posts")
   -exclude-reblogs
         Whether or not to exclude reblogs
   -exclude-replies
         Whether or not exclude replies to other users
   -limit int
         Maximum number of posts to fetch (default 40)
+  -max-id string
+        Fetch posts lesser than this id
+  -min-id string
+        Fetch posts immediately newer than this id
   -persist
         Persist most recent post id to /tmp/mastodon-pesos-fid
   -since-id string
-        Fetch only posts made since passed post id
+        Fetch posts greater than this id
   -user string
         URL of User's Mastodon account whose toots will be fetched
 ```

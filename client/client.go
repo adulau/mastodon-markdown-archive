@@ -42,6 +42,8 @@ type PostsFilter struct {
 	ExcludeReblogs bool
 	Limit          int
 	SinceId        string
+	MinId          string
+	MaxId          string
 }
 
 func New(userURL string) (Client, error) {
@@ -82,6 +84,14 @@ func (c Client) GetPosts(filter PostsFilter) ([]Post, error) {
 
 	if filter.SinceId != "" {
 		queryValues.Add("since_id", filter.SinceId)
+	}
+
+	if filter.MaxId != "" {
+		queryValues.Add("max_id", filter.MaxId)
+	}
+
+	if filter.MinId != "" {
+		queryValues.Add("min_id", filter.MinId)
 	}
 
 	queryValues.Add("limit", strconv.Itoa(filter.Limit))

@@ -10,12 +10,14 @@ import (
 )
 
 func main() {
-	dist := flag.String("dist", "", "Path to directory where files will be written")
+	dist := flag.String("dist", "./posts", "Path to directory where files will be written")
 	user := flag.String("user", "", "URL of User's Mastodon account whose toots will be fetched")
 	excludeReplies := flag.Bool("exclude-replies", false, "Whether or not exclude replies to other users")
 	excludeReblogs := flag.Bool("exclude-reblogs", false, "Whether or not to exclude reblogs")
 	limit := flag.Int("limit", 40, "Maximum number of posts to fetch")
-	sinceId := flag.String("since-id", "", "Fetch only posts made since passed post id")
+	sinceId := flag.String("since-id", "", "Fetch posts greater than this id")
+	maxId := flag.String("max-id", "", "Fetch posts lesser than this id")
+	minId := flag.String("min-id", "", "Fetch posts immediately newer than this id")
 	persist := flag.Bool("persist", false, "Persist most recent post id to /tmp/mastodon-pesos-fid")
 
 	flag.Parse()
@@ -31,6 +33,8 @@ func main() {
 		ExcludeReblogs: *excludeReblogs,
 		Limit:          *limit,
 		SinceId:        *sinceId,
+		MaxId:          *maxId,
+		MinId:          *minId,
 	})
 
 	if err != nil {
