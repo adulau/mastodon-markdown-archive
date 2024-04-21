@@ -29,7 +29,7 @@ Usage of ./mastodon-pesos:
         URL of User's Mastodon account whose toots will be fetched
 ```
 
-## Usage
+## Example
 
 Here is how I use this to fetch the 15 most recent posts in my Mastodon account. It excludes replies to others, and reblogs. 
 
