@@ -26,13 +26,13 @@ type MediaAttachment struct {
 }
 
 type Post struct {
-	CreatedAt          time.Time         `json:"created_at"`
-	Id                 string            `json:"id"`
-	Visibility         string            `json:"visibility"`
-	InReplyToAccountId string            `json:"in_reply_to_account_id"`
-	URI                string            `json:"uri"`
-	Content            string            `json:"content"`
-	MediaAttachments   []MediaAttachment `json:"media_attachments"`
+	CreatedAt        time.Time         `json:"created_at"`
+	Id               string            `json:"id"`
+	Visibility       string            `json:"visibility"`
+	InReplyToId      string            `json:"in_reply_to_id"`
+	URI              string            `json:"uri"`
+	Content          string            `json:"content"`
+	MediaAttachments []MediaAttachment `json:"media_attachments"`
 }
 
 func New(userURL string) (Client, error) {

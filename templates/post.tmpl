@@ -1,0 +1,13 @@
+---
+date: {{ .Post.CreatedAt }}
+post_url: {{ .Post.URI }}
+post_ids:
+- {{ .Post.Id }}
+{{- range .Replies }}
+- {{ .Id }}
+{{- end }}
+---
+{{ .Content }}
+{{ range .Replies }}
+{{ .Content }}
+{{ end }}
