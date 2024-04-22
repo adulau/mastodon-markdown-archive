@@ -148,3 +148,7 @@ func get(requestUrl string, variable interface{}) error {
 
 	return nil
 }
+
+func ShouldSkipPost(post Post) bool {
+	return post.Visibility != "unlisted" && post.Visibility != "public"
+}

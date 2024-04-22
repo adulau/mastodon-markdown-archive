@@ -50,6 +50,10 @@ func main() {
 	log.Println(fmt.Sprintf("Fetched %d posts", len(posts)))
 
 	for _, post := range posts {
+		if client.ShouldSkipPost(post) {
+			continue
+		}
+
 		if err := fileWriter.Write(post); err != nil {
 			log.Panicln("error writing post to file: %w", err)
 			break
