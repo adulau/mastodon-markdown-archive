@@ -2,7 +2,7 @@ package files
 
 import (
 	"fmt"
-	"git.hq.ggpsv.com/gabriel/mastodon-pesos/client"
+	"git.garrido.io/gabriel/mastodon-pesos/client"
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"os"
 	"path/filepath"

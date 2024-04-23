@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"git.hq.ggpsv.com/gabriel/mastodon-pesos/client"
-	"git.hq.ggpsv.com/gabriel/mastodon-pesos/files"
+	"git.garrido.io/gabriel/mastodon-pesos/client"
+	"git.garrido.io/gabriel/mastodon-pesos/files"
 	"log"
 	"os"
 )
