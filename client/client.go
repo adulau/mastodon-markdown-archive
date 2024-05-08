@@ -25,6 +25,12 @@ type MediaAttachment struct {
 	Type        string `json:"type"`
 	Url         string `json:"url"`
 	Description string `json:"description"`
+	Id          string `json:"id"`
+	Path		string
+}
+
+func (ma MediaAttachment) SetPath(path string) {
+	ma.Path = path
 }
 
 type Post struct {

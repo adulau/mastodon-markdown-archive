@@ -2,11 +2,15 @@ package files
 
 import (
 	"fmt"
-	"git.garrido.io/gabriel/mastodon-pesos/client"
-	md "github.com/JohannesKaufmann/html-to-markdown"
+	"io"
+	"mime"
+	"net/http"
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"git.garrido.io/gabriel/mastodon-pesos/client"
+	md "github.com/JohannesKaufmann/html-to-markdown"
 )
 
 type FileWriter struct {
@@ -55,9 +59,41 @@ func (f FileWriter) Write(post client.Post) error {
 	var descendants []client.Post
 	f.getReplies(post.Id, &descendants)
 
-	name := fmt.Sprintf("%s.md", post.Id)
-	filename := filepath.Join(f.dir, name)
-	file, err := os.Create(filename)
+	var file *os.File
+
+	if len(post.MediaAttachments) == 0 {
+		name := fmt.Sprintf("%s.md", post.Id)
+		filename := filepath.Join(f.dir, name)
+		file, err = os.Create(filename)
+	} else {
+		dir := filepath.Join(f.dir, post.Id)
+		imagedir := filepath.Join(dir, "images")
+
+		os.Mkdir(dir, os.ModePerm)
+		os.Mkdir(imagedir, os.ModePerm)
+
+		for i := 0; i < len(post.MediaAttachments); i++ {
+			media := &post.MediaAttachments[i]			
+			if media.Type != "image" {
+				continue
+			}
+
+			image, err := downloadAttachment(imagedir, media.Id, media.Url)
+
+			if err != nil {
+				return err
+			}
+
+			media.Path = fmt.Sprintf("images/%s", image)
+		}
+
+		if err != nil {
+			return fmt.Errorf("error downloading media attachments: %w", err)
+		}
+
+		filename := filepath.Join(dir, "index.md")
+		file, err = os.Create(filename)
+	}
 
 	if err != nil {
 		return fmt.Errorf("error creating file: %w", err)
@@ -91,4 +127,56 @@ func (f FileWriter) getReplies(postId string, replies *[]client.Post) {
 		*replies = append(*replies, reply)
 		f.getReplies(reply.Id, replies)
 	}
+}
+
+func downloadAttachment(dir string, id string, url string) (string, error) {
+	var filename string
+
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept", "image/*")
+	res, err := client.Do(req)
+
+	if err != nil {
+		return filename, err
+	}
+
+	defer res.Body.Close()
+
+	contentType := res.Header.Get("Content-Type")
+	extensions, err := mime.ExtensionsByType(contentType)
+
+	if err != nil {
+		return filename, err
+	}
+
+	var ext string
+	urlExt := filepath.Ext(url)
+
+	for _, i := range extensions {
+		if i == urlExt {
+			ext = i
+			break
+		}
+	}
+
+	if ext == "" {
+		return filename, fmt.Errorf("Could not match extension for media")
+	}
+
+	filename = fmt.Sprintf("%s%s", id, ext)
+	file, err := os.Create(filepath.Join(dir, filename))
+
+	if err != nil {
+		return filename, err
+	}
+
+	defer file.Close()
+	_, err = io.Copy(file, res.Body)
+
+	if err != nil {
+		return filename, err
+	}
+
+	return filename, nil
 }

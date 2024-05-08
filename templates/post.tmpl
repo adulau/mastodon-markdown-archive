@@ -12,7 +12,7 @@ post_ids:
 
 {{ range .Post.MediaAttachments }}
 	{{- if eq .Type "image" -}}
-![{{ .Description }}]({{ .Url }})
+![{{ .Description }}]({{ .Path }})
 	{{ end }}
 {{- end -}}
 
@@ -20,7 +20,7 @@ post_ids:
 {{ .Content | tomd -}}
 	{{ range .MediaAttachments }}
 		{{- if eq .Type "image" -}}
-![{{ .Description }}]({{ .Url }})
+![{{ .Description }}]({{ .Path }})
 		{{ end }}
 	{{- end -}}
 {{- end -}}
