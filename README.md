@@ -1,10 +1,12 @@
-# Mastodon PESOS
+# Mastodon markdown archive
 
-Fetch a Mastodon account's posts and save them as Markdown files. Posts are transformed to Markdown, images are inlined, and replies are threaded. Implements most of the parameters in Mastodon's [API to get account's statuses](https://docs.joinmastodon.org/methods/accounts/#statuses). 
+Fetch a Mastodon account's posts and save them as markdown files. Post content is converted to markdown, images are downloaded and inlined, and replies are threaded. Implements most of the parameters in Mastodon's public [API to get an account's statuses](https://docs.joinmastodon.org/methods/accounts/#statuses).
 
-For the time being this formats the files with [Hugo](https://gohugo.io) front-matter.
+For the time being this formats the files in accordance to [Hugo's](https://gohugo.io) front-matter. 
 
-I use this small tool to create an archive of my Mastodon posts, which I then [syndicate to my own site](https://indieweb.org/PESOS).
+If a post has images, the post is created as a Hugo [page bundle](https://gohugo.io/content-management/page-bundles/) and images are downloaded in the corresponding post directory.
+
+I use this tool to create an [archive of my Mastodon posts](https://garrido.io/microblog/), which I then syndicate to my own site following [PESOS](https://indieweb.org/PESOS).
 
 ## Flags
 ```
