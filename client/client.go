@@ -29,10 +29,6 @@ type MediaAttachment struct {
 	Path        string
 }
 
-func (ma MediaAttachment) SetPath(path string) {
-	ma.Path = path
-}
-
 type Post struct {
 	CreatedAt        time.Time         `json:"created_at"`
 	Id               string            `json:"id"`
