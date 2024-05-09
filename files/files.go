@@ -67,24 +67,21 @@ func (f FileWriter) Write(post client.Post) error {
 		file, err = os.Create(filename)
 	} else {
 		dir := filepath.Join(f.dir, post.Id)
-		imagedir := filepath.Join(dir, "images")
-
 		os.Mkdir(dir, os.ModePerm)
-		os.Mkdir(imagedir, os.ModePerm)
 
 		for i := 0; i < len(post.MediaAttachments); i++ {
-			media := &post.MediaAttachments[i]			
+			media := &post.MediaAttachments[i]
 			if media.Type != "image" {
 				continue
 			}
 
-			image, err := downloadAttachment(imagedir, media.Id, media.Url)
+			imageFilename, err := downloadAttachment(dir, media.Id, media.Url)
 
 			if err != nil {
 				return err
 			}
 
-			media.Path = fmt.Sprintf("images/%s", image)
+			media.Path = imageFilename
 		}
 
 		if err != nil {
@@ -150,21 +147,21 @@ func downloadAttachment(dir string, id string, url string) (string, error) {
 		return filename, err
 	}
 
-	var ext string
-	urlExt := filepath.Ext(url)
+	var extension string
+	urlExtension := filepath.Ext(url)
 
 	for _, i := range extensions {
-		if i == urlExt {
-			ext = i
+		if i == urlExtension {
+			extension = i
 			break
 		}
 	}
 
-	if ext == "" {
-		return filename, fmt.Errorf("Could not match extension for media")
+	if extension == "" {
+		return filename, fmt.Errorf("could not match extension for media")
 	}
 
-	filename = fmt.Sprintf("%s%s", id, ext)
+	filename = fmt.Sprintf("%s%s", id, extension)
 	file, err := os.Create(filepath.Join(dir, filename))
 
 	if err != nil {

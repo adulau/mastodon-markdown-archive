@@ -26,7 +26,7 @@ type MediaAttachment struct {
 	Url         string `json:"url"`
 	Description string `json:"description"`
 	Id          string `json:"id"`
-	Path		string
+	Path        string
 }
 
 func (ma MediaAttachment) SetPath(path string) {
