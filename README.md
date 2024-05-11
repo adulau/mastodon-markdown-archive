@@ -18,7 +18,7 @@ You can clone this repo and run `go build main.go` in the repository's directory
 ```
 Usage of mastodon-markdown-archive:
   -dist string
-        Path to directory where files will be written, defaults ./posts
+        Path to directory where files will be written (default "./posts")
   -exclude-reblogs
         Whether or not to exclude reblogs
   -exclude-replies
@@ -36,7 +36,7 @@ Usage of mastodon-markdown-archive:
   -since-id string
         Fetch posts greater than this id
   -template string
-        Template to use for post rendering, defaults to templates/post.tmpl
+        Template to use for post rendering, if passed
   -user string
         URL of User's Mastodon account whose toots will be fetched
 ```

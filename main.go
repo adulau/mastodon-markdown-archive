@@ -22,7 +22,7 @@ func main() {
 	minId := flag.String("min-id", "", "Fetch posts immediately newer than this id")
 	persistFirst := flag.String("persist-first", "", "Location to persist the post id of the first post returned")
 	persistLast := flag.String("persist-last", "", "Location to persist the post id of the last post returned")
-	templateFile := flag.String("template", "", "Template to use for post rendering, defaults to templates/post.tmpl")
+	templateFile := flag.String("template", "", "Template to use for post rendering, if passed")
 
 	flag.Parse()
 
