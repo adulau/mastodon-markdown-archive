@@ -4,7 +4,7 @@ Fetch a Mastodon account's posts and save them as markdown files. Post content i
 
 Implements most of the parameters in Mastodon's public [API to get an account's statuses](https://docs.joinmastodon.org/methods/accounts/#statuses).
 
-If a post has images, the post is created as a Hugo [page bundle](https://gohugo.io/content-management/page-bundles/) and images are downloaded in the corresponding post directory.
+If a post has images, the post is created as a bundle of files in the manner of Hugo [page bundles](https://gohugo.io/content-management/page-bundles/), and the images are downloaded in the corresponding directory.
 
 I use this tool to create an [archive of my Mastodon posts](https://garrido.io/microblog/), which I then syndicate to my own site following [PESOS](https://indieweb.org/PESOS).
 
@@ -85,7 +85,7 @@ mastodon-markdown-archive \
 
 ## Template
 
-By default, this tool uses the [post.tmp](./files/templates/post.tmpl) template to create the markdown file. A different template can be used by passing its path to `--template`.
+By default, this tool uses the [post.tmpl](./files/templates/post.tmpl) template to create the markdown file. A different template can be used by passing its path to `--template`.
 
 For information about variables and functions available in the template context, refer to the `Write` method in [files.go](files/files.go#L95-L101).
 
