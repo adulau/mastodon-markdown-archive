@@ -43,13 +43,13 @@ Usage of mastodon-markdown-archive:
 
 ## Example
 
-Here is how I use this to archive posts from my Mastodon account. I exclude replies to others, and reblogs. 
+Here is how I use this to archive posts from my Mastodon account. 
 
-I use this tool programatically, and I certainly do not want to recreate the archive from scratch each time.
+I use this tool programatically, and I certainly do not want to recreate the archive from scratch each time. I exclude replies to others, and reblogs.
 
 I first use this to generate an archive up to a certain point in time. Then, I use it to archive posts made since the last archived post.
 
-Mastodo imposts an upper limit of 40 posts in their API. With `--persist-first` and `--persist-last` I can save cursors of the upper and lower bound of posts that were fetched. I can then use Mastodon's `max-id`, `min-id`, and `since-id` parameters to get the posts that I need, depending on each cae.
+Mastodon imposes an upper limit of 40 posts in their API. With `--persist-first` and `--persist-last` I can save cursors of the upper and lower bound of posts that were fetched. I can then use Mastodon's `max-id`, `min-id`, and `since-id` parameters to get the posts that I need, depending on each cae.
 
 ### Generating an entire archive
 
