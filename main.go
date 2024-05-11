@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"git.garrido.io/gabriel/mastodon-markdown-archive/client"
-	"git.garrido.io/gabriel/mastodon-markdown-archive/files"
 	"log"
 	"os"
+	"path/filepath"
+
+	"git.garrido.io/gabriel/mastodon-markdown-archive/client"
+	"git.garrido.io/gabriel/mastodon-markdown-archive/files"
 )
 
 func main() {
@@ -18,7 +20,9 @@ func main() {
 	sinceId := flag.String("since-id", "", "Fetch posts greater than this id")
 	maxId := flag.String("max-id", "", "Fetch posts lesser than this id")
 	minId := flag.String("min-id", "", "Fetch posts immediately newer than this id")
-	persist := flag.Bool("persist", false, "Persist most recent post id to /tmp/mastodon-pesos-fid")
+	persistFirst := flag.String("persist-first", "", "Location to persist the post id of the first post returned")
+	persistLast := flag.String("persist-last", "", "Location to persist the post id of the last post returned")
+	templateFile := flag.String("template", "", "Template to use for post rendering, defaults to templates/post.tmpl")
 
 	flag.Parse()
 
@@ -28,7 +32,7 @@ func main() {
 		log.Panicln(fmt.Errorf("error instantiating client: %w", err))
 	}
 
-	posts, err := c.GetPosts(client.PostsFilter{
+	posts, err := c.Posts(client.PostsFilter{
 		ExcludeReplies: *excludeReplies,
 		ExcludeReblogs: *excludeReblogs,
 		Limit:          *limit,
@@ -54,16 +58,45 @@ func main() {
 			continue
 		}
 
-		if err := fileWriter.Write(post); err != nil {
+		if err := fileWriter.Write(post, *templateFile); err != nil {
 			log.Panicln("error writing post to file: %w", err)
 			break
 		}
 	}
 
-	if *persist && len(posts) > 0 {
-		lastPost := posts[0]
+	postsCount := len(posts)
 
-		fid := []byte(lastPost.Id)
-		os.WriteFile("/tmp/mastodon-pesos-fid", fid, 0644)
+	if postsCount > 0 {
+		if *persistFirst != "" {
+			firstPost := posts[0]
+			err := persistId(firstPost.Id, *persistFirst)
+
+			if err != nil {
+				log.Panicln(err)
+			}
+		}
+
+		if *persistLast != "" {
+			lastPost := posts[postsCount-1]
+			err := persistId(lastPost.Id, *persistLast)
+
+			if err != nil {
+				log.Panicln(err)
+			}
+		}
 	}
+}
+
+func persistId(postId string, path string) error {
+	persistPath, err := filepath.Abs(path)
+
+	if err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(persistPath, []byte(postId), 0644); err != nil {
+		return err
+	}
+
+	return nil
 }

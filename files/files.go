@@ -43,9 +43,14 @@ func New(dir string) (FileWriter, error) {
 	}, nil
 }
 
-func (f FileWriter) Write(post client.Post) error {
-	tpmlFilename := "templates/post.tmpl"
-	tmplFile, err := filepath.Abs(tpmlFilename)
+func (f FileWriter) Write(post client.Post, templateFile string) error {
+	tmplFilename := "templates/post.tmpl"
+
+	if templateFile != "" {
+		tmplFilename = templateFile
+	}
+
+	tmplFile, err := filepath.Abs(tmplFilename)
 
 	if err != nil {
 		return fmt.Errorf("error resolving template absolute path: %w", err)
@@ -104,7 +109,7 @@ func (f FileWriter) Write(post client.Post) error {
 		"tomd": converter.ConvertString,
 	}
 
-	tmpl, err := template.New(filepath.Base(tpmlFilename)).Funcs(funcs).ParseFiles(tmplFile)
+	tmpl, err := template.New(filepath.Base(tmplFilename)).Funcs(funcs).ParseFiles(tmplFile)
 
 	context := TemplateContext{
 		Post:        post,

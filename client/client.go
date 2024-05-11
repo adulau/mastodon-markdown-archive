@@ -66,7 +66,7 @@ func New(userURL string) (Client, error) {
 	}, nil
 }
 
-func (c Client) GetPosts(filter PostsFilter) ([]Post, error) {
+func (c Client) Posts(filter PostsFilter) ([]Post, error) {
 	var posts []Post
 	account, err := c.getAccount()
 
@@ -152,5 +152,5 @@ func get(requestUrl string, variable interface{}) error {
 }
 
 func ShouldSkipPost(post Post) bool {
-	return post.Visibility != "unlisted" && post.Visibility != "public"
+	return post.Visibility != "public"
 }
