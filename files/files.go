@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"git.garrido.io/gabriel/mastodon-pesos/client"
+	"git.garrido.io/gabriel/mastodon-markdown-archive/client"
 	md "github.com/JohannesKaufmann/html-to-markdown"
 )
 
