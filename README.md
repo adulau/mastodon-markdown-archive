@@ -12,7 +12,7 @@ I use this tool to create an [archive of my Mastodon posts](https://garrido.io/m
 ```
 Usage of mastodon-markdown-archive:
   -dist string
-        Path to directory where files will be written (default "./posts")
+        Path to directory where files will be written, defaults ./posts
   -exclude-reblogs
         Whether or not to exclude reblogs
   -exclude-replies
