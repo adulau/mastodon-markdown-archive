@@ -8,6 +8,12 @@ If a post has images, the post is created as a Hugo [page bundle](https://gohugo
 
 I use this tool to create an [archive of my Mastodon posts](https://garrido.io/microblog/), which I then syndicate to my own site following [PESOS](https://indieweb.org/PESOS).
 
+## Install
+
+[Go](https://go.dev/doc/install) is required for installation.
+
+You can clone this repo and run `go build main.go` in the repository's directory, or you can run `go install git.garrido.io/gabriel/mastodon-markdown-archive@latest` to install a binary of the latest version.
+
 ## Usage
 ```
 Usage of mastodon-markdown-archive:
