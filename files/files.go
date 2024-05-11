@@ -1,6 +1,7 @@
 package files
 
 import (
+	"embed"
 	"fmt"
 	"io"
 	"mime"
@@ -12,6 +13,9 @@ import (
 	"git.garrido.io/gabriel/mastodon-markdown-archive/client"
 	md "github.com/JohannesKaufmann/html-to-markdown"
 )
+
+//go:embed templates/post.tmpl
+var templates embed.FS
 
 type FileWriter struct {
 	dir    string
@@ -44,18 +48,6 @@ func New(dir string) (FileWriter, error) {
 }
 
 func (f FileWriter) Write(post client.Post, templateFile string) error {
-	tmplFilename := "templates/post.tmpl"
-
-	if templateFile != "" {
-		tmplFilename = templateFile
-	}
-
-	tmplFile, err := filepath.Abs(tmplFilename)
-
-	if err != nil {
-		return fmt.Errorf("error resolving template absolute path: %w", err)
-	}
-
 	if post.InReplyToId != "" {
 		f.repies[post.InReplyToId] = post
 		return nil
@@ -65,6 +57,7 @@ func (f FileWriter) Write(post client.Post, templateFile string) error {
 	f.getReplies(post.Id, &descendants)
 
 	var file *os.File
+	var err error
 
 	if len(post.MediaAttachments) == 0 {
 		name := fmt.Sprintf("%s.md", post.Id)
@@ -89,10 +82,6 @@ func (f FileWriter) Write(post client.Post, templateFile string) error {
 			media.Path = imageFilename
 		}
 
-		if err != nil {
-			return fmt.Errorf("error downloading media attachments: %w", err)
-		}
-
 		filename := filepath.Join(dir, "index.md")
 		file, err = os.Create(filename)
 	}
@@ -103,18 +92,12 @@ func (f FileWriter) Write(post client.Post, templateFile string) error {
 
 	defer file.Close()
 
-	converter := md.NewConverter("", true, nil)
-
-	funcs := template.FuncMap{
-		"tomd": converter.ConvertString,
-	}
-
-	tmpl, err := template.New(filepath.Base(tmplFilename)).Funcs(funcs).ParseFiles(tmplFile)
-
+	tmpl, err := resolveTemplate(templateFile)
 	context := TemplateContext{
 		Post:        post,
 		Descendants: descendants,
 	}
+
 	err = tmpl.Execute(file, context)
 
 	if err != nil {
@@ -181,4 +164,30 @@ func downloadAttachment(dir string, id string, url string) (string, error) {
 	}
 
 	return filename, nil
+}
+
+func resolveTemplate(templateFile string) (*template.Template, error) {
+	converter := md.NewConverter("", true, nil)
+
+	funcs := template.FuncMap{
+		"tomd": converter.ConvertString,
+	}
+
+	if templateFile == "" {
+		tmpl, err := template.New("post.tmpl").Funcs(funcs).ParseFS(templates, "templates/*.tmpl")
+
+		if err != nil {
+			return tmpl, err
+		}
+
+		return tmpl, nil
+	}
+
+	tmpl, err := template.New(filepath.Base(templateFile)).Funcs(funcs).ParseGlob(templateFile)
+
+	if err != nil {
+		return tmpl, err
+	}
+
+	return tmpl, nil
 }

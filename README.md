@@ -79,7 +79,7 @@ mastodon-markdown-archive \
 
 ## Template
 
-By default, this tool uses the [post.tmp](./templates/post.tmpl) template to create the markdown file. A different template can be used by passing its path to `--template`.
+By default, this tool uses the [post.tmp](./files/templates/post.tmpl) template to create the markdown file. A different template can be used by passing its path to `--template`.
 
-For information about variables and functions available in the template context, refer to the `Write` method in [files.go](files/files.go#L108-L117).
+For information about variables and functions available in the template context, refer to the `Write` method in [files.go](files/files.go#L104-L110).
 
