@@ -18,25 +18,70 @@ type Client struct {
 }
 
 type Account struct {
-	Id string `json:"id"`
+	Id             string    `json:"id"`
+	Username       string    `json:"username"`
+	Acct           string    `json:"acct"`
+	DisplayName    string    `json:"display_name"`
+	Locked         bool      `json:"locked"`
+	Bot            bool      `json:"bot"`
+	Discoverable   bool      `json:"discoverable"`
+	Group          bool      `json:"group"`
+	CreatedAt      time.Time `json:"created_at"`
+	Note           string    `json:"note"`
+	URL            string    `json:"url"`
+	URI            string    `json:"uri"`
+	Avatar         string    `json:"avatar"`
+	AvatarStatic   string    `json:"avatar_static"`
+	Header         string    `json:"header"`
+	HeaderStatic   string    `json:"header_static"`
+	FollowersCount int       `json:"followers_count"`
+	FollowingCount int       `json:"following_count"`
+	StatusesCount  int       `json:"statuses_count"`
+	LastStatusAt   string `json:"last_status_at"`
 }
 
 type MediaAttachment struct {
 	Type        string `json:"type"`
-	Url         string `json:"url"`
+	URL         string `json:"url"`
 	Description string `json:"description"`
 	Id          string `json:"id"`
 	Path        string
 }
 
+type Application struct {
+	Name    string `json:"name"`
+	Website string `json:"website"`
+}
+
+type Tag struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
 type Post struct {
-	CreatedAt        time.Time         `json:"created_at"`
-	Id               string            `json:"id"`
-	Visibility       string            `json:"visibility"`
-	InReplyToId      string            `json:"in_reply_to_id"`
-	URI              string            `json:"uri"`
-	Content          string            `json:"content"`
-	MediaAttachments []MediaAttachment `json:"media_attachments"`
+	CreatedAt          time.Time         `json:"created_at"`
+	Id                 string            `json:"id"`
+	Visibility         string            `json:"visibility"`
+	InReplyToId        string            `json:"in_reply_to_id"`
+	InReplyToAccountId string            `json:"in_reply_to_account_id"`
+	Sensitive          bool              `json:"sensitive"`
+	SpoilerText        string            `json:"spoiler_text"`
+	Language           string            `json:"language"`
+	URI                string            `json:"uri"`
+	URL                string            `json:"url"`
+	Application        Application       `json:"application"`
+	Content            string            `json:"content"`
+	MediaAttachments   []MediaAttachment `json:"media_attachments"`
+	RepliesCount       int               `json:"replies_count"`
+	ReblogsCount       int               `json:"reblogs_count"`
+	FavoritesCount     int               `json:"favourites_count"`
+	Pinned             bool              `json:"pinned"`
+	Tags               []Tag             `json:"tags"`
+	Favourited         bool              `json:"favourited"`
+	Reblogged          bool              `json:"reblogged"`
+	Muted              bool              `json:"muted"`
+	Bookmarked         bool              `json:"bookmarked"`
+	Account            Account           `json:"account"`
 }
 
 type PostsFilter struct {
@@ -131,6 +176,22 @@ func (c Client) getAccount() (Account, error) {
 	}
 
 	return account, nil
+}
+
+func TagsForPost(post Post, descendants []Post) []Tag {
+	var tags []Tag
+
+	for _, tag := range post.Tags {
+		tags = append(tags, tag)
+	}
+
+	for _, descendant := range descendants {
+		for _, tag := range descendant.Tags {
+			tags = append(tags, tag)
+		}
+	}
+
+	return tags
 }
 
 func get(requestUrl string, variable interface{}) error {

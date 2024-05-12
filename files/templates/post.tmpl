@@ -1,26 +1,36 @@
 ---
 date: {{ .Post.CreatedAt }}
-post_url: {{ .Post.URI }}
-post_ids:
-- {{ .Post.Id }}
+{{- if .Post.InReplyToId }}
+in_reply_to: {{ .Post.InReplyToId }}
+{{- end }}
+post_uri: {{ .Post.URI }}
+post_id: {{ .Post.Id }}
+{{- if len .Tags }}
+tags:
+{{- range .Tags }}
+- {{ .Name }}
+{{- end }}
+{{- end }}
+{{- if len .Descendants }}
+descendants:
 {{- range .Descendants }}
 - {{ .Id }}
 {{- end }}
+{{- end }}
 ---
-
 {{ .Post.Content | tomd }}
 
-{{ range .Post.MediaAttachments }}
-	{{- if eq .Type "image" -}}
+{{- range .Post.MediaAttachments }}
+{{ if eq .Type "image" }}
 ![{{ .Description }}]({{ .Path }})
-	{{ end }}
+{{ end }}
 {{- end -}}
 
 {{- range .Descendants }}
 {{ .Content | tomd -}}
-	{{ range .MediaAttachments }}
-		{{- if eq .Type "image" -}}
+{{- range .MediaAttachments }}
+{{ if eq .Type "image" }}
 ![{{ .Description }}]({{ .Path }})
-		{{ end }}
-	{{- end -}}
+{{ end }}
+{{- end -}}
 {{- end -}}

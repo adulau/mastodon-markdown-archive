@@ -25,6 +25,7 @@ type FileWriter struct {
 type TemplateContext struct {
 	Post        client.Post
 	Descendants []client.Post
+	Tags        []client.Tag
 }
 
 func New(dir string) (FileWriter, error) {
@@ -47,8 +48,8 @@ func New(dir string) (FileWriter, error) {
 	}, nil
 }
 
-func (f FileWriter) Write(post client.Post, templateFile string) error {
-	if post.InReplyToId != "" {
+func (f FileWriter) Write(post client.Post, threaded bool, templateFile string) error {
+	if threaded && post.InReplyToId != "" {
 		f.repies[post.InReplyToId] = post
 		return nil
 	}
@@ -73,7 +74,7 @@ func (f FileWriter) Write(post client.Post, templateFile string) error {
 				continue
 			}
 
-			imageFilename, err := downloadAttachment(dir, media.Id, media.Url)
+			imageFilename, err := downloadAttachment(dir, media.Id, media.URL)
 
 			if err != nil {
 				return err
@@ -96,6 +97,7 @@ func (f FileWriter) Write(post client.Post, templateFile string) error {
 	context := TemplateContext{
 		Post:        post,
 		Descendants: descendants,
+		Tags:        client.TagsForPost(post, descendants),
 	}
 
 	err = tmpl.Execute(file, context)
