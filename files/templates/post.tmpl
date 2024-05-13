@@ -5,27 +5,33 @@ in_reply_to: {{ .Post.InReplyToId }}
 {{- end }}
 post_uri: {{ .Post.URI }}
 post_id: {{ .Post.Id }}
-{{- if len .Tags }}
+{{- if len .Post.AllTags }}
 tags:
-{{- range .Tags }}
+{{- range .Post.AllTags }}
 - {{ .Name }}
 {{- end }}
 {{- end }}
-{{- if len .Descendants }}
+{{- if len .Post.Descendants }}
 descendants:
-{{- range .Descendants }}
+{{- range .Post.Descendants }}
 - {{ .Id }}
 {{- end }}
 {{- end }}
 ---
 {{ .Post.Content | tomd }}
+<<<<<<< Updated upstream
 
 {{- range .Post.MediaAttachments }}
 {{ if eq .Type "image" }}
+=======
+{{ range .Post.MediaAttachments }}
+{{- if eq .Type "image" }}
+>>>>>>> Stashed changes
 ![{{ .Description }}]({{ .Path }})
 {{ end }}
 {{- end -}}
 
+<<<<<<< Updated upstream
 {{- range .Descendants }}
 {{ .Content | tomd -}}
 {{- range .MediaAttachments }}
@@ -34,3 +40,13 @@ descendants:
 {{ end }}
 {{- end -}}
 {{- end -}}
+=======
+{{ range .Post.Descendants }}
+{{ .Content | tomd }}
+{{ range .MediaAttachments }}
+{{- if eq .Type "image" }}
+![{{ .Description }}]({{ .Path }})
+{{- end }}
+{{- end }}
+{{- end }}
+>>>>>>> Stashed changes
