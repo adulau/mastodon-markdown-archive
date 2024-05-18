@@ -66,7 +66,38 @@ func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
 	client.populateIdMap()
 
 	if threaded {
-		client.generateReplies()
+		client.threadReplies()
+
+		if len(client.orphans) > 0 {
+			for _, pid := range client.orphans {
+				statusContext, err := FetchStatusContext(baseURL, pid)
+
+				if err != nil {
+					return client, err
+				}
+
+				top := statusContext.Ancestors[0]
+
+				for _, post := range statusContext.Ancestors[1:] {
+					client.posts = append(client.posts, post)
+					top.descendants = append(top.descendants, &client.posts[len(client.posts)-1])
+				}
+
+				top.descendants = append(top.descendants, &client.posts[client.postIdMap[pid]])
+
+				for _, post := range statusContext.Descendants {
+					if post.Account.Id != client.account.Id {
+						continue
+					}
+
+					client.posts = append(client.posts, post)
+					top.descendants = append(top.descendants, &client.posts[len(client.posts)-1])
+				}
+
+				client.posts = append(client.posts, top)
+				client.output = append(client.output, len(client.posts)-1)
+			}
+		}
 	} else {
 		for i := range client.posts {
 			client.output = append(client.output, i)
@@ -104,7 +135,7 @@ func (c *Client) flushReplies(post *Post, descendants *[]*Post) {
 	}
 }
 
-func (c *Client) generateReplies() {
+func (c *Client) threadReplies() {
 	for i := range c.posts {
 		post := &c.posts[i]
 		if post.InReplyToId == "" {
@@ -114,7 +145,6 @@ func (c *Client) generateReplies() {
 		}
 
 		if _, ok := c.postIdMap[post.InReplyToId]; ok {
-			// TODO: Exclude from list of posts that gets rendered to disc
 			c.replies[post.InReplyToId] = post.Id
 		} else {
 			c.orphans = append(c.orphans, post.Id)

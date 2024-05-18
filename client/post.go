@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+type StatusContext struct {
+	Ancestors   []Post `json:"ancestors"`
+	Descendants []Post `json:"descendants"`
+}
+
 type MediaAttachment struct {
 	Type        string `json:"type"`
 	URL         string `json:"url"`
@@ -136,4 +141,21 @@ func FetchPosts(baseURL string, accountId string, filters PostsFilter) ([]Post, 
 	}
 
 	return posts, nil
+}
+
+func FetchStatusContext(baseURL, postId string) (StatusContext, error) {
+	var status StatusContext
+	statusUrl := fmt.Sprintf(
+		"%s/api/v1/statuses/%s/context",
+		baseURL,
+		postId,
+	)
+
+	log.Println(statusUrl)
+
+	if err := Fetch(statusUrl, &status); err != nil {
+		return status, err
+	}
+
+	return status, nil
 }
