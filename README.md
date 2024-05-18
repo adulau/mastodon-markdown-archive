@@ -24,7 +24,7 @@ Usage of mastodon-markdown-archive:
   -exclude-replies
         Whether or not exclude replies to other users
   -limit int
-        Maximum number of posts to fetch (default 40)
+        Maximum number of posts to fetch (default 40, maximum 40)
   -max-id string
         Fetch posts lesser than this id
   -min-id string
@@ -37,6 +37,8 @@ Usage of mastodon-markdown-archive:
         Fetch posts greater than this id
   -template string
         Template to use for post rendering, if passed
+  -threaded
+        Thread replies for a post in a single file (default true)
   -user string
         URL of User's Mastodon account whose toots will be fetched
 ```
