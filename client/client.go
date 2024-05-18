@@ -7,15 +7,19 @@ import (
 )
 
 type Client struct {
-	handle    string
-	baseURL   string
-	filters   PostsFilter
-	account   Account
-	posts     []Post
-	replies   map[string]string
-	orphans   []string
-	postIdMap map[string]int
-	output    []int
+	handle  string
+	baseURL string
+	filters PostsFilter
+	account Account
+	// Map of Post.InReplyToId:PostId. Tracks the replies on a 1:1 basis.
+	replies map[string]string
+	// List of Post.Id. Tracks posts whose parent is not within the bounds of
+	// the returned posts.
+	orphans []string
+	// Map of Post.Id:*Post.
+	postIdMap map[string]*Post
+	// List of Post.Id. Tracks the posts which will be written as individual files.
+	output []string
 }
 
 type PostsFilter struct {
@@ -51,26 +55,35 @@ func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
 		return client, err
 	}
 
+	postIdMap := make(map[string]*Post)
 	var orphans []string
+	var output []string
+
+	for i := range posts {
+		post := posts[i]
+		postIdMap[post.Id] = &post
+		if !threaded {
+			output = append(output, post.Id)
+		}
+	}
+
 	client = Client{
 		baseURL:   baseURL,
 		handle:    handle,
 		filters:   filters,
 		account:   account,
-		posts:     posts,
-		postIdMap: make(map[string]int),
+		postIdMap: postIdMap,
 		replies:   make(map[string]string),
 		orphans:   orphans,
+		output:    output,
 	}
 
-	client.populateIdMap()
-
 	if threaded {
-		client.threadReplies()
+		client.threadReplies(posts)
 
 		if len(client.orphans) > 0 {
-			for _, pid := range client.orphans {
-				statusContext, err := FetchStatusContext(baseURL, pid)
+			for _, postId := range client.orphans {
+				statusContext, err := FetchStatusContext(baseURL, postId)
 
 				if err != nil {
 					return client, err
@@ -78,29 +91,27 @@ func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
 
 				top := statusContext.Ancestors[0]
 
-				for _, post := range statusContext.Ancestors[1:] {
-					client.posts = append(client.posts, post)
-					top.descendants = append(top.descendants, &client.posts[len(client.posts)-1])
+				for i := range statusContext.Ancestors[1:] {
+					post := statusContext.Ancestors[i+1]
+					client.postIdMap[post.Id] = &post
+					top.descendants = append(top.descendants, &post)
 				}
 
-				top.descendants = append(top.descendants, &client.posts[client.postIdMap[pid]])
+				top.descendants = append(top.descendants, client.postIdMap[postId])
 
-				for _, post := range statusContext.Descendants {
+				for i := range statusContext.Descendants {
+					post := statusContext.Descendants[i]
 					if post.Account.Id != client.account.Id {
 						continue
 					}
 
-					client.posts = append(client.posts, post)
-					top.descendants = append(top.descendants, &client.posts[len(client.posts)-1])
+					client.postIdMap[post.Id] = &post
+					top.descendants = append(top.descendants, &post)
 				}
 
-				client.posts = append(client.posts, top)
-				client.output = append(client.output, len(client.posts)-1)
+				client.postIdMap[top.Id] = &top
+				client.output = append(client.output, top.Id)
 			}
-		}
-	} else {
-		for i := range client.posts {
-			client.output = append(client.output, i)
 		}
 	}
 
@@ -115,32 +126,26 @@ func (c Client) Posts() []*Post {
 	var p []*Post
 
 	for _, i := range c.output {
-		p = append(p, &c.posts[i])
+		p = append(p, c.postIdMap[i])
 	}
 
 	return p
 }
 
-func (c *Client) populateIdMap() {
-	for i, post := range c.posts {
-		c.postIdMap[post.Id] = i
-	}
-}
-
 func (c *Client) flushReplies(post *Post, descendants *[]*Post) {
 	if pid, ok := c.replies[post.Id]; ok {
-		reply := c.posts[c.postIdMap[pid]]
-		*descendants = append(*descendants, &reply)
-		c.flushReplies(&reply, descendants)
+		reply := c.postIdMap[pid]
+		*descendants = append(*descendants, reply)
+		c.flushReplies(reply, descendants)
 	}
 }
 
-func (c *Client) threadReplies() {
-	for i := range c.posts {
-		post := &c.posts[i]
+func (c *Client) threadReplies(posts []Post) {
+	for i := range posts {
+		post := &posts[i]
 		if post.InReplyToId == "" {
 			c.flushReplies(post, &post.descendants)
-			c.output = append(c.output, i)
+			c.output = append(c.output, post.Id)
 			continue
 		}
 
