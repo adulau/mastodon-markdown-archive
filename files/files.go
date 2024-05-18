@@ -46,7 +46,7 @@ func New(dir string) (FileWriter, error) {
 	}
 
 	return FileWriter{
-		dir:    absDir,
+		dir: absDir,
 	}, nil
 }
 
