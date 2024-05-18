@@ -56,6 +56,7 @@ func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
 	}
 
 	postIdMap := make(map[string]*Post)
+	replies := make(map[string]string)
 	var orphans []string
 	var output []string
 
@@ -73,46 +74,13 @@ func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
 		filters:   filters,
 		account:   account,
 		postIdMap: postIdMap,
-		replies:   make(map[string]string),
+		replies:   replies,
 		orphans:   orphans,
 		output:    output,
 	}
 
 	if threaded {
 		client.threadReplies(posts)
-
-		if len(client.orphans) > 0 {
-			for _, postId := range client.orphans {
-				statusContext, err := FetchStatusContext(baseURL, postId)
-
-				if err != nil {
-					return client, err
-				}
-
-				top := statusContext.Ancestors[0]
-
-				for i := range statusContext.Ancestors[1:] {
-					post := statusContext.Ancestors[i+1]
-					client.postIdMap[post.Id] = &post
-					top.descendants = append(top.descendants, &post)
-				}
-
-				top.descendants = append(top.descendants, client.postIdMap[postId])
-
-				for i := range statusContext.Descendants {
-					post := statusContext.Descendants[i]
-					if post.Account.Id != client.account.Id {
-						continue
-					}
-
-					client.postIdMap[post.Id] = &post
-					top.descendants = append(top.descendants, &post)
-				}
-
-				client.postIdMap[top.Id] = &top
-				client.output = append(client.output, top.Id)
-			}
-		}
 	}
 
 	return client, nil
@@ -123,13 +91,48 @@ func (c Client) Account() Account {
 }
 
 func (c Client) Posts() []*Post {
-	var p []*Post
+	var posts []*Post
 
-	for _, i := range c.output {
-		p = append(p, c.postIdMap[i])
+	for _, postId := range c.output {
+		posts = append(posts, c.postIdMap[postId])
 	}
 
-	return p
+	return posts
+}
+
+func (c *Client) buildOrphans() error {
+	for _, postId := range c.orphans {
+		statusContext, err := FetchStatusContext(c.baseURL, postId)
+
+		if err != nil {
+			return err
+		}
+
+		top := statusContext.Ancestors[0]
+
+		for i := range statusContext.Ancestors[1:] {
+			post := statusContext.Ancestors[i+1]
+			c.postIdMap[post.Id] = &post
+			top.descendants = append(top.descendants, &post)
+		}
+
+		top.descendants = append(top.descendants, c.postIdMap[postId])
+
+		for i := range statusContext.Descendants {
+			post := statusContext.Descendants[i]
+			if post.Account.Id != c.account.Id {
+				continue
+			}
+
+			c.postIdMap[post.Id] = &post
+			top.descendants = append(top.descendants, &post)
+		}
+
+		c.postIdMap[top.Id] = &top
+		c.output = append(c.output, top.Id)
+	}
+
+	return nil
 }
 
 func (c *Client) flushReplies(post *Post, descendants *[]*Post) {
@@ -154,5 +157,9 @@ func (c *Client) threadReplies(posts []Post) {
 		} else {
 			c.orphans = append(c.orphans, post.Id)
 		}
+	}
+
+	if len(c.orphans) > 0 {
+		c.buildOrphans()
 	}
 }
