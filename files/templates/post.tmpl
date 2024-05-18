@@ -19,28 +19,13 @@ descendants:
 {{- end }}
 ---
 {{ .Post.Content | tomd }}
-<<<<<<< Updated upstream
 
-{{- range .Post.MediaAttachments }}
-{{ if eq .Type "image" }}
-=======
 {{ range .Post.MediaAttachments }}
 {{- if eq .Type "image" }}
->>>>>>> Stashed changes
 ![{{ .Description }}]({{ .Path }})
 {{ end }}
 {{- end -}}
 
-<<<<<<< Updated upstream
-{{- range .Descendants }}
-{{ .Content | tomd -}}
-{{- range .MediaAttachments }}
-{{ if eq .Type "image" }}
-![{{ .Description }}]({{ .Path }})
-{{ end }}
-{{- end -}}
-{{- end -}}
-=======
 {{ range .Post.Descendants }}
 {{ .Content | tomd }}
 {{ range .MediaAttachments }}
@@ -49,4 +34,3 @@ descendants:
 {{- end }}
 {{- end }}
 {{- end }}
->>>>>>> Stashed changes
