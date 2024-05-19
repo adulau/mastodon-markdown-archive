@@ -18,7 +18,7 @@ descendants:
 {{- end }}
 {{- end }}
 ---
-{{ .Post.Content | tomd }}
+{{ .Post.Content | toMarkdown }}
 
 {{ range .Post.MediaAttachments }}
 {{- if eq .Type "image" }}
@@ -27,7 +27,7 @@ descendants:
 {{- end -}}
 
 {{ range .Post.Descendants }}
-{{ .Content | tomd }}
+{{ .Content | toMarkdown }}
 {{ range .MediaAttachments }}
 {{- if eq .Type "image" }}
 ![{{ .Description }}]({{ .Path }})

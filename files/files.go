@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"github.com/Masterminds/sprig/v3"
 	"io"
 	"mime"
 	"net/http"
@@ -112,17 +113,10 @@ func (f *FileWriter) formatFilename(post *client.Post) (string, error) {
 		tmplString = f.filenameTemplate
 	}
 
-	tmpl := template.Must(template.New("filename").Parse(tmplString))
-
-	year, month, day := post.CreatedAt.Date()
+	tmpl := template.Must(template.New("filename").Funcs(sprig.FuncMap()).Parse(tmplString))
 
 	filenameData := FilenameTemplateContext{
 		Post: post,
-		Date: FilenameDate{
-			Year:  year,
-			Month: fmt.Sprintf("%02d", int(month)),
-			Day:   fmt.Sprintf("%02d", day),
-		},
 	}
 
 	var nameBuffer bytes.Buffer
@@ -265,9 +259,8 @@ func downloadAttachment(dir string, id string, url string) (string, error) {
 func resolveTemplate(templateFile string) (*template.Template, error) {
 	converter := md.NewConverter("", true, nil)
 
-	funcs := template.FuncMap{
-		"tomd": converter.ConvertString,
-	}
+	funcs := sprig.FuncMap()
+	funcs["toMarkdown"] = converter.ConvertString
 
 	if templateFile == "" {
 		tmpl, err := template.New("post.tmpl").Funcs(funcs).ParseFS(templates, "templates/*.tmpl")
