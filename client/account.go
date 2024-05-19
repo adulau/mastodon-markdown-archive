@@ -36,7 +36,8 @@ func FetchAccount(baseURL string, handle string) (Account, error) {
 		handle,
 	)
 
-	err := Fetch(lookupUrl, &account)
+	headers := make(map[string]string)
+	err := Fetch(lookupUrl, &account, headers)
 
 	if err != nil {
 		return account, err

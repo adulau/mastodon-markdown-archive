@@ -6,8 +6,15 @@ import (
 	"net/http"
 )
 
-func Fetch(requestUrl string, variable interface{}) error {
-	res, err := http.Get(requestUrl)
+func Fetch(requestUrl string, variable interface{}, headers map[string]string) error {
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", requestUrl, nil)
+
+	for key, val := range headers {
+		req.Header.Set(key, val)
+	}
+
+	res, err := client.Do(req)
 
 	if err != nil {
 		return err

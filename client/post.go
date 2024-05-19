@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 )
@@ -115,6 +116,7 @@ func (p Post) AllMedia() []MediaAttachment {
 
 func FetchPosts(baseURL string, accountId string, filters PostsFilter) ([]Post, error) {
 	var posts []Post
+	headers := make(map[string]string)
 
 	queryValues := url.Values{}
 
@@ -160,8 +162,10 @@ func FetchPosts(baseURL string, accountId string, filters PostsFilter) ([]Post, 
 		accountId,
 		query,
 	)
+	setAuthTokenIfPassed(&headers)
 
-	if err := Fetch(postsUrl, &posts); err != nil {
+
+	if err := Fetch(postsUrl, &posts, headers); err != nil {
 		return posts, err
 	}
 
@@ -170,15 +174,26 @@ func FetchPosts(baseURL string, accountId string, filters PostsFilter) ([]Post, 
 
 func FetchStatusContext(baseURL, postId string) (StatusContext, error) {
 	var status StatusContext
+	headers := make(map[string]string)
+
 	statusUrl := fmt.Sprintf(
 		"%s/api/v1/statuses/%s/context",
 		baseURL,
 		postId,
 	)
 
-	if err := Fetch(statusUrl, &status); err != nil {
+	setAuthTokenIfPassed(&headers)
+
+	if err := Fetch(statusUrl, &status, headers); err != nil {
 		return status, err
 	}
 
 	return status, nil
+}
+
+func setAuthTokenIfPassed(headers *map[string]string) {
+	token, ok := os.LookupEnv("MASTODON_AUTH_TOKEN")
+	if ok {
+		(*headers)["Authorization"] = fmt.Sprintf("Bearer %s", token)
+	}
 }
