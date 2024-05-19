@@ -378,6 +378,6 @@ Sprig's [path](https://masterminds.github.io/sprig/paths.html) functions can be 
 
 You can use `--download-media=bundle` to save the post media in a single directory with its original post. In this case, the post's filename will be used as the directory name and the post filename will be `index.{extension}`.
 
-For example, `--download-media="./bundle" --filename='{{ .Post.CreatedAt | date "2006-01-02" }}-{{.Post.Id}}.md'` will create a `YYYY-MM-DD-<post id>/` directory, with the post saved as `YYYY-MM-DD-<post id>/index.md` and media saved as `YYYY-MM-DD-<post id>/<media id>.<media ext>`.
+For example, `--download-media="bundle" --filename='{{ .Post.CreatedAt | date "2006-01-02" }}-{{.Post.Id}}.md'` will create a `YYYY-MM-DD-<post id>/` directory, with the post saved as `YYYY-MM-DD-<post id>/index.md` and media saved as `YYYY-MM-DD-<post id>/<media id>.<media ext>`.
 
 This is done specifically to support Hugo [page bundles](https://gohugo.io/content-management/page-bundles).
