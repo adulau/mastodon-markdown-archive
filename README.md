@@ -17,7 +17,25 @@ This program essentially wraps the Mastodon API with a command line interface wi
 
 I use this tool to create an archive of my Mastodon posts and [syndicate them to my own site](https://garrido.io/microblog/), per IndieWeb's [PESOS philosophy](https://indieweb.org/PESOS).
 
-## Install
+## Table of contents
+* [Installation](Installation)
+* [Usage](#usage)
+  * [Environment variables](#environment-variables)
+* [Examples](#examples)
+  * [Generating an entire archive](#generating-an-entire-archive)
+  * [Getting the latest posts](#getting-the-latest-posts)
+* [Threading](#threading)
+  * [Orphaned posts](#orphaned-posts)
+* [Templating](#templating)
+  * [Post](#post)
+  * [Filename](#filename)
+  * [Available functions and variables](#available-functions-and-variables)
+    * [Functions](#functions)
+    * [Variables](#variables)
+* [Post media](#post-media)
+  * [Bundling](#bundling)
+
+## Installation
 
 [Go](https://go.dev/doc/install) is required for installation.
 
@@ -66,7 +84,17 @@ Usage of mastodon-markdown-archive:
         Filter out posts whose visibility does not match the passed visibility value
 ```
 
-## Example
+The only required flags for this program to work is `dist` and `user`. All other flags are there for Mastodon's API parameters, or to support more complex use cases. See the [examples](#examples) section. 
+
+### Environment variables
+
+If the `MASTODON_AUTH_TOKEN` environment variable is set then this program will set the `Authorization` header for the statuses and statuses context API requests. This token only needs the `read:statuses` permission.
+
+In the context of the statuses request, this allows you to fetch private statuses that only you can normally see. For example, if a post's visibility is set to "Followers only".
+
+In the context of the status context request for [orphaned posts](#orphaned-posts), this allows you to fetch private statuses and surpass the limited amount of ancestors and descendants.
+
+## Examples
 
 I use this tool programatically, and I do not want to recreate the archive from scratch each time. I thread posts, exclude replies to others, exclude reblogs, and filter out any post that is not public.
 
