@@ -301,6 +301,10 @@ For both the post and filename templates, the following functions and variables 
 
 Here are some examples for basic templates that can be used. For an example on threading replies, see the [default template](files/templates/post.tmpl).
 
+For any of these, save the template file somewhere and pass its path to the command as a value of the `--template` flag.
+
+For the filename, pass it as a string to the command as a value of the `--filename` flag.
+
 #### Jekyll
 
 Template: 
