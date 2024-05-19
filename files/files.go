@@ -1,6 +1,7 @@
 package files
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"git.garrido.io/gabriel/mastodon-markdown-archive/client"
@@ -23,6 +25,17 @@ type FileWriter struct {
 
 type TemplateContext struct {
 	Post *client.Post
+}
+
+type FilenameDate struct {
+	Year  int
+	Month string
+	Day   string
+}
+
+type FilenameTemplateContext struct {
+	Post *client.Post
+	Date FilenameDate
 }
 
 type PostFile struct {
@@ -50,9 +63,9 @@ func New(dir string) (FileWriter, error) {
 	}, nil
 }
 
-func (f FileWriter) Write(post *client.Post, templateFile string) error {
+func (f FileWriter) Write(post *client.Post, templateFile, filenameTemplate string) error {
 	hasMedia := len(post.AllMedia()) > 0
-	postFile, err := f.createFile(post, hasMedia)
+	postFile, err := f.createFile(post, hasMedia, filenameTemplate)
 
 	if err != nil {
 		return err
@@ -89,18 +102,60 @@ func (f FileWriter) Write(post *client.Post, templateFile string) error {
 	return nil
 }
 
-func (f FileWriter) createFile(post *client.Post, shouldBundle bool) (PostFile, error) {
+func formatFilename(post *client.Post, filenameTemplate string) (string, error) {
+	tmplString := "{{.Post.Id}}"
+
+	if filenameTemplate != "" {
+		tmplString = filenameTemplate
+	}
+
+	tmpl := template.Must(template.New("filename").Parse(tmplString))
+
+	year, month, day := post.CreatedAt.Date()
+
+	filenameData := FilenameTemplateContext{
+		Post: post,
+		Date: FilenameDate{
+			Year: year,
+			Month: fmt.Sprintf("%02d", int(month)),
+			Day: fmt.Sprintf("%02d", day),
+		},
+	}
+
+	var nameBuffer bytes.Buffer
+
+	if err := tmpl.Execute(&nameBuffer, filenameData); err != nil {
+		return "", err
+	}
+
+	return nameBuffer.String(), nil
+}
+
+func (f FileWriter) createFile(post *client.Post, shouldBundle bool, filenameTemplate string) (PostFile, error) {
 	var postFile PostFile
 
+	outputFilename, err := formatFilename(post, filenameTemplate)
+	extension := filepath.Ext(outputFilename)
+
+	if extension == "" {
+		extension = ".md"
+	} else {
+		outputFilename = strings.TrimSuffix(outputFilename, extension)
+	}
+
+	if err != nil {
+		return postFile, err
+	}
+
 	if shouldBundle {
-		dir := filepath.Join(f.dir, post.Id)
+		dir := filepath.Join(f.dir, outputFilename)
 
 		_, err := os.Stat(dir)
 		if os.IsNotExist(err) {
 			os.Mkdir(dir, os.ModePerm)
 		}
 
-		name := filepath.Join(dir, "index.md")
+		name := filepath.Join(dir, fmt.Sprintf("index%s", extension))
 		file, err := os.Create(name)
 
 		if err != nil {
@@ -116,7 +171,7 @@ func (f FileWriter) createFile(post *client.Post, shouldBundle bool) (PostFile, 
 		return postFile, nil
 	}
 
-	name := filepath.Join(f.dir, fmt.Sprintf("%s.md", post.Id))
+	name := filepath.Join(f.dir, fmt.Sprintf("%s%s", outputFilename, extension))
 	file, err := os.Create(name)
 
 	if err != nil {

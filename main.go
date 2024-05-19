@@ -24,6 +24,7 @@ func main() {
 	persistLast := flag.String("persist-last", "", "Location to persist the post id of the last post returned")
 	templateFile := flag.String("template", "", "Template to use for post rendering, if passed")
 	threaded := flag.Bool("threaded", true, "Thread replies for a post in a single file")
+	filenameTemplate := flag.String("filename", "", "Template for post filename")
 
 	flag.Parse()
 
@@ -51,7 +52,7 @@ func main() {
 			continue
 		}
 
-		if err := fileWriter.Write(post, *templateFile); err != nil {
+		if err := fileWriter.Write(post, *templateFile, *filenameTemplate); err != nil {
 			log.Panicln("error writing post to file: %w", err)
 			break
 		}

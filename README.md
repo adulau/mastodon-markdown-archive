@@ -23,8 +23,10 @@ Usage of mastodon-markdown-archive:
         Whether or not to exclude reblogs
   -exclude-replies
         Whether or not exclude replies to other users
+  -filename string
+        Template for post filename
   -limit int
-        Maximum number of posts to fetch (default 40, maximum 40)
+        Maximum number of posts to fetch (default 40)
   -max-id string
         Fetch posts lesser than this id
   -min-id string
