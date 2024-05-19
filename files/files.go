@@ -257,10 +257,16 @@ func downloadAttachment(dir string, id string, url string) (string, error) {
 }
 
 func resolveTemplate(templateFile string) (*template.Template, error) {
-	converter := md.NewConverter("", true, nil)
+	converter := md.NewConverter("", true, &md.Options{
+		EscapeMode: "disabled",
+	})
+	converterEscaped := md.NewConverter("", true, &md.Options{
+		EscapeMode: "basic",
+	})
 
 	funcs := sprig.FuncMap()
 	funcs["toMarkdown"] = converter.ConvertString
+	funcs["toMarkdownEscaped"] = converterEscaped.ConvertString
 
 	if templateFile == "" {
 		tmpl, err := template.New("post.tmpl").Funcs(funcs).ParseFS(templates, "templates/*.tmpl")
