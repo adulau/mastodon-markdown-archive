@@ -57,6 +57,18 @@ type Post struct {
 	descendants        []*Post
 }
 
+type PostsFilter struct {
+	ExcludeReplies bool
+	ExcludeReblogs bool
+	Limit          int
+	SinceId        string
+	MinId          string
+	MaxId          string
+	OnlyMedia      bool
+	Pinned         bool
+	Tagged         string
+}
+
 func (p Post) ShouldSkip(visibility string) bool {
 	if visibility == "" {
 		return false
@@ -124,6 +136,18 @@ func FetchPosts(baseURL string, accountId string, filters PostsFilter) ([]Post, 
 
 	if filters.MinId != "" {
 		queryValues.Add("min_id", filters.MinId)
+	}
+
+	if filters.Tagged != "" {
+		queryValues.Add("tagged", filters.Tagged)
+	}
+
+	if filters.OnlyMedia {
+		queryValues.Add("only_media", strconv.Itoa(1))
+	}
+
+	if filters.Pinned {
+		queryValues.Add("pinned", strconv.Itoa(1))
 	}
 
 	queryValues.Add("limit", strconv.Itoa(filters.Limit))

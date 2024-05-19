@@ -14,19 +14,22 @@ import (
 func main() {
 	dist := flag.String("dist", "./posts", "Path to directory where files will be written")
 	user := flag.String("user", "", "URL of Mastodon account whose toots will be fetched")
-	excludeReplies := flag.Bool("exclude-replies", false, "Exclude replies to other users")
-	excludeReblogs := flag.Bool("exclude-reblogs", false, "Exclude reblogs")
-	limit := flag.Int("limit", 40, "Maximum number of posts to fetch")
-	sinceId := flag.String("since-id", "", "Fetch posts greater than this id")
-	maxId := flag.String("max-id", "", "Fetch posts older than this id")
-	minId := flag.String("min-id", "", "Fetch posts newer than this id")
+	excludeReplies := flag.Bool("exclude-replies", false, "Mastodon API parameter: Filter out statuses in reply to a different account")
+	excludeReblogs := flag.Bool("exclude-reblogs", false, "Mastodon API parameter: Filter out boosts from the response")
+	limit := flag.Int("limit", 40, "Mastodon API parameter: Maximum number of results to return. Defaults to 20 statuses. Max 40 statuses")
+	onlyMedia := flag.Bool("only-media", false, "Mastodon API parameter: Filter out status without attachments")
+	pinned := flag.Bool("pinned", false, "Mastodon API parameter: Filter for pinned statuses only")
+	sinceId := flag.String("since-id", "", "Mastodon API parameter: All results returned will be greater than this ID. In effect, sets a lower bound on results.")
+	maxId := flag.String("max-id", "", "Mastodon API parameter: All results returned will be lesser than this ID. In effect, sets an upper bound on results.")
+	minId := flag.String("min-id", "", "Mastodon API parameter: Returns results immediately newer than this ID. In effect, sets a cursor at this ID and paginates forward.")
+	tagged := flag.String("tagged", "", "Mastodon API parameter: Filter for statuses using a specific hashtag")
 	persistFirst := flag.String("persist-first", "", "Location to persist the post id of the first post returned")
 	persistLast := flag.String("persist-last", "", "Location to persist the post id of the last post returned")
 	templateFile := flag.String("template", "", "Template to use for post rendering, if passed")
 	threaded := flag.Bool("threaded", false, "Thread replies for a post in a single file")
 	filenameTemplate := flag.String("filename", "", "Template for post filename")
 	porcelain := flag.Bool("porcelain", false, "Prints the amount of fetched posts to stdout in a parsable manner")
-	downloadMedia := flag.String("download-media", "", "Download media in a post. Omit or pass an empty string to not download media. Pass 'bundle' to download the media inline in a single directory with its original post. Pass a path to a directory to download all media there.")
+	downloadMedia := flag.String("download-media", "", "Path where post attachments will be downloaded. Omit to skip downloading attachments.")
 	visibility := flag.String("visibility", "", "Filter out posts whose visibility does not match the passed visibility value")
 
 	flag.Parse()
@@ -38,6 +41,9 @@ func main() {
 		SinceId:        *sinceId,
 		MaxId:          *maxId,
 		MinId:          *minId,
+		OnlyMedia:      *onlyMedia,
+		Pinned:         *pinned,
+		Tagged: *tagged,
 	}, client.ClientOptions{
 		Threaded:   *threaded,
 		Visibility: *visibility,

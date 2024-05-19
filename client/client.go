@@ -28,15 +28,6 @@ type Client struct {
 	options ClientOptions
 }
 
-type PostsFilter struct {
-	ExcludeReplies bool
-	ExcludeReblogs bool
-	Limit          int
-	SinceId        string
-	MinId          string
-	MaxId          string
-}
-
 func New(userURL string, filters PostsFilter, opts ClientOptions) (Client, error) {
 	var client Client
 	parsedURL, err := url.Parse(userURL)
