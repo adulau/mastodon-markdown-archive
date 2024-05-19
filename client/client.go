@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+type ClientOptions struct {
+	Visibility string
+	Threaded   bool
+}
+
 type Client struct {
 	handle  string
 	baseURL string
@@ -19,7 +24,8 @@ type Client struct {
 	// Map of Post.Id:*Post.
 	postIdMap map[string]*Post
 	// List of Post.Id. Tracks the posts which will be written as individual files.
-	output []string
+	output  []string
+	options ClientOptions
 }
 
 type PostsFilter struct {
@@ -31,7 +37,7 @@ type PostsFilter struct {
 	MaxId          string
 }
 
-func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
+func New(userURL string, filters PostsFilter, opts ClientOptions) (Client, error) {
 	var client Client
 	parsedURL, err := url.Parse(userURL)
 
@@ -63,7 +69,7 @@ func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
 	for i := range posts {
 		post := posts[i]
 		postIdMap[post.Id] = &post
-		if !threaded {
+		if !opts.Threaded && !post.ShouldSkip(opts.Visibility) {
 			output = append(output, post.Id)
 		}
 	}
@@ -77,9 +83,10 @@ func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
 		replies:   replies,
 		orphans:   orphans,
 		output:    output,
+		options:   opts,
 	}
 
-	if threaded {
+	if opts.Threaded {
 		for _, post := range posts {
 			client.threadPost(post.Id)
 		}
@@ -154,7 +161,7 @@ func (c *Client) flushReplies(post *Post, descendants *[]*Post) {
 func (c *Client) threadPost(postId string) {
 	post := c.postIdMap[postId]
 
-	if post.InReplyToId == "" {
+	if post.InReplyToId == "" && !post.ShouldSkip(c.options.Visibility) {
 		c.flushReplies(post, &post.descendants)
 		c.output = append(c.output, post.Id)
 		return

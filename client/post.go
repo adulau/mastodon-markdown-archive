@@ -57,8 +57,12 @@ type Post struct {
 	descendants        []*Post
 }
 
-func (p Post) ShouldSkip() bool {
-	return p.Visibility != "public"
+func (p Post) ShouldSkip(visibility string) bool {
+	if visibility == "" {
+		return false
+	}
+
+	return p.Visibility != visibility
 }
 
 func (p Post) Descendants() []*Post {

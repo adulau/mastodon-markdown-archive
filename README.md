@@ -45,7 +45,8 @@ Usage of mastodon-markdown-archive:
         Thread replies for a post in a single file
   -user string
         URL of Mastodon account whose toots will be fetched
-
+  -visibility string
+        Filter out posts whose visibility does not match the passed visibility value
 ```
 
 ## Example

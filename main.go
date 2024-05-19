@@ -27,6 +27,7 @@ func main() {
 	filenameTemplate := flag.String("filename", "", "Template for post filename")
 	porcelain := flag.Bool("porcelain", false, "Prints the amount of fetched posts to stdout in a parsable manner")
 	downloadMedia := flag.String("download-media", "", "Download media in a post. Omit or pass an empty string to not download media. Pass 'bundle' to download the media inline in a single directory with its original post. Pass a path to a directory to download all media there.")
+	visibility := flag.String("visibility", "", "Filter out posts whose visibility does not match the passed visibility value")
 
 	flag.Parse()
 
@@ -37,7 +38,10 @@ func main() {
 		SinceId:        *sinceId,
 		MaxId:          *maxId,
 		MinId:          *minId,
-	}, *threaded)
+	}, client.ClientOptions{
+		Threaded:   *threaded,
+		Visibility: *visibility,
+	})
 
 	if err != nil {
 		log.Panicln(err)
@@ -58,10 +62,6 @@ func main() {
 	}
 
 	for _, post := range posts {
-		if post.ShouldSkip() {
-			continue
-		}
-
 		if err := fileWriter.Write(post); err != nil {
 			log.Panicln("error writing post to file: %w", err)
 		}
