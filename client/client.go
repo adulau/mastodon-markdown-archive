@@ -80,7 +80,15 @@ func New(userURL string, filters PostsFilter, threaded bool) (Client, error) {
 	}
 
 	if threaded {
-		client.threadReplies(posts)
+		for _, post := range posts {
+			client.threadPost(post.Id)
+		}
+
+		if len(client.orphans) > 0 {
+			if err := client.buildOrphans(); err != nil {
+				return client, nil
+			}
+		}
 	}
 
 	return client, nil
@@ -143,23 +151,18 @@ func (c *Client) flushReplies(post *Post, descendants *[]*Post) {
 	}
 }
 
-func (c *Client) threadReplies(posts []Post) {
-	for i := range posts {
-		post := &posts[i]
-		if post.InReplyToId == "" {
-			c.flushReplies(post, &post.descendants)
-			c.output = append(c.output, post.Id)
-			continue
-		}
+func (c *Client) threadPost(postId string) {
+	post := c.postIdMap[postId]
 
-		if _, ok := c.postIdMap[post.InReplyToId]; ok {
-			c.replies[post.InReplyToId] = post.Id
-		} else {
-			c.orphans = append(c.orphans, post.Id)
-		}
+	if post.InReplyToId == "" {
+		c.flushReplies(post, &post.descendants)
+		c.output = append(c.output, post.Id)
+		return
 	}
 
-	if len(c.orphans) > 0 {
-		c.buildOrphans()
+	if _, ok := c.postIdMap[post.InReplyToId]; ok {
+		c.replies[post.InReplyToId] = post.Id
+	} else {
+		c.orphans = append(c.orphans, post.Id)
 	}
 }

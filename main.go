@@ -23,7 +23,7 @@ func main() {
 	persistFirst := flag.String("persist-first", "", "Location to persist the post id of the first post returned")
 	persistLast := flag.String("persist-last", "", "Location to persist the post id of the last post returned")
 	templateFile := flag.String("template", "", "Template to use for post rendering, if passed")
-	threaded := flag.Bool("threaded", true, "Thread replies for a post in a single file")
+	threaded := flag.Bool("threaded", false, "Thread replies for a post in a single file")
 	filenameTemplate := flag.String("filename", "", "Template for post filename")
 	porcelain := flag.Bool("porcelain", false, "Prints the amount of fetched posts to stdout in a parsable manner")
 
