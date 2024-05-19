@@ -14,6 +14,8 @@ This program essentially wraps the Mastodon API with a command line interface wi
 - Optionally filter based on post visibility
 - Optional affordances for scripting
 - Optionally persist fetched post id cursors
+- Optionally set authorization token to fetch private posts
+
 
 I use this tool to create an archive of my Mastodon posts and [syndicate them to my own site](https://garrido.io/microblog/), per IndieWeb's [PESOS philosophy](https://indieweb.org/PESOS).
 
@@ -32,6 +34,11 @@ I use this tool to create an archive of my Mastodon posts and [syndicate them to
   * [Available functions and variables](#available-functions-and-variables)
     * [Functions](#functions)
     * [Variables](#variables)
+  * [Template examples](#template-examples)
+    * [Jekyll](#jekyll)
+    * [Hugo and 11ty](#hugo-and-11ty)
+    * [HTML](#html)
+    * [Text only](#text-only)
 * [Post media](#post-media)
   * [Bundling](#bundling)
 
@@ -290,6 +297,69 @@ For both the post and filename templates, the following functions and variables 
 #### Variables
 * [Post](https://pkg.go.dev/git.garrido.io/gabriel/mastodon-markdown-archive/client#Post)
 
+### Template examples
+
+Here are some examples for basic templates that can be used. For an example on threading replies, see the [default template](files/templates/post.tmpl).
+
+#### Jekyll
+
+Template: 
+```md
+---
+layout: post
+title: {{ .Post.Id }}
+---
+
+{{ .Post.Content | toMarkdown }}
+```
+
+Filename:
+`{{.Post.CreatedAt | date "2006-01-02"}}-{{.Post.Id}}.md`
+
+#### Hugo and 11ty
+The default template and filename is built for Hugo as that's the static site generator that I use, but a minimum viable template that works for either can look like this:
+
+```md
+---
+title: {{ .Post.Id }}
+date: {{ .Post.CreatedAt | date "2006-01-02" }}
+---
+
+{{ .Post.Content | toMarkdown }}
+```
+
+Filename:
+`{{.Post.CreatedAt | date "2006-01-02"}}-{{.Post.Id}}.md`
+
+#### HTML
+
+Template:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ .Post.Id }}</title>
+</head>
+<body>
+  {{.Post.Content}}
+</body>
+</html>
+```
+Filename: `{{ .Post.Id }}.html`
+
+#### Text only
+
+Template:
+
+```txt
+{{ .Post.Content }}
+```
+
+Filename: `{{ .Post.Id }}.txt`
+
 ## Post media
 
 By default, a post's media is not downloaded. Use the `--download-media` flag with a path to download a post's media. The post's original file is downloaded, and the image's id is used as the filename. 
@@ -298,7 +368,7 @@ For example, `--download-media=./images` saves any media to the `./images`.
 
 Once downloaded, the media's path is available in [MediaAttachment.Path](https://pkg.go.dev/git.garrido.io/gabriel/mastodon-markdown-archive/client#MediaAttachment) as an absolute path.
 
-Sprig's [path](https://masterminds.github.io/sprig/paths.html) functions can be used in the templates to manipulate the path as necessary. For example, the [default template](https://git.hq.ggpsv.com/gabriel/mastodon-markdown-archive/src/branch/main/files/templates/post.tmpl#L25-L27) uses `osBase` to get the last element of the filepath.  
+Sprig's [path](https://masterminds.github.io/sprig/paths.html) functions can be used in the templates to manipulate the path as necessary. For example, the [default template](files/templates/post.tmpl#L25-L27) uses `osBase` to get the last element of the filepath.  
 
 ### Bundling
 
