@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"strconv"
 	"time"
@@ -134,8 +133,6 @@ func FetchPosts(baseURL string, accountId string, filters PostsFilter) ([]Post, 
 		query,
 	)
 
-	log.Println(fmt.Sprintf("Fetching posts from %s", postsUrl))
-
 	if err := Fetch(postsUrl, &posts); err != nil {
 		return posts, err
 	}
@@ -150,8 +147,6 @@ func FetchStatusContext(baseURL, postId string) (StatusContext, error) {
 		baseURL,
 		postId,
 	)
-
-	log.Println(statusUrl)
 
 	if err := Fetch(statusUrl, &status); err != nil {
 		return status, err

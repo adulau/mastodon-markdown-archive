@@ -35,6 +35,8 @@ Usage of mastodon-markdown-archive:
         Location to persist the post id of the first post returned
   -persist-last string
         Location to persist the post id of the last post returned
+  -porcelain
+        Prints the amount of fetched posts to stdout in a parsable manner
   -since-id string
         Fetch posts greater than this id
   -template string
