@@ -20,7 +20,9 @@ import (
 var templates embed.FS
 
 type FileWriter struct {
-	dir string
+	dir              string
+	templateFile     string
+	filenameTemplate string
 }
 
 type TemplateContext struct {
@@ -44,7 +46,7 @@ type PostFile struct {
 	File *os.File
 }
 
-func New(dir string) (FileWriter, error) {
+func New(dir string, templateFile string, filenameTemplate string) (FileWriter, error) {
 	var fileWriter FileWriter
 	_, err := os.Stat(dir)
 
@@ -59,13 +61,14 @@ func New(dir string) (FileWriter, error) {
 	}
 
 	return FileWriter{
-		dir: absDir,
+		dir:              absDir,
+		templateFile:     templateFile,
+		filenameTemplate: filenameTemplate,
 	}, nil
 }
 
-func (f FileWriter) Write(post *client.Post, templateFile, filenameTemplate string) error {
-	hasMedia := len(post.AllMedia()) > 0
-	postFile, err := f.createFile(post, hasMedia, filenameTemplate)
+func (f *FileWriter) Write(post *client.Post) error {
+	postFile, err := f.createFile(post)
 
 	if err != nil {
 		return err
@@ -88,7 +91,7 @@ func (f FileWriter) Write(post *client.Post, templateFile, filenameTemplate stri
 		}
 	}
 
-	tmpl, err := resolveTemplate(templateFile)
+	tmpl, err := resolveTemplate(f.templateFile)
 	context := TemplateContext{
 		Post: post,
 	}
@@ -102,11 +105,11 @@ func (f FileWriter) Write(post *client.Post, templateFile, filenameTemplate stri
 	return nil
 }
 
-func formatFilename(post *client.Post, filenameTemplate string) (string, error) {
+func (f *FileWriter) formatFilename(post *client.Post) (string, error) {
 	tmplString := "{{.Post.Id}}"
 
-	if filenameTemplate != "" {
-		tmplString = filenameTemplate
+	if f.filenameTemplate != "" {
+		tmplString = f.filenameTemplate
 	}
 
 	tmpl := template.Must(template.New("filename").Parse(tmplString))
@@ -116,9 +119,9 @@ func formatFilename(post *client.Post, filenameTemplate string) (string, error) 
 	filenameData := FilenameTemplateContext{
 		Post: post,
 		Date: FilenameDate{
-			Year: year,
+			Year:  year,
 			Month: fmt.Sprintf("%02d", int(month)),
-			Day: fmt.Sprintf("%02d", day),
+			Day:   fmt.Sprintf("%02d", day),
 		},
 	}
 
@@ -131,10 +134,11 @@ func formatFilename(post *client.Post, filenameTemplate string) (string, error) 
 	return nameBuffer.String(), nil
 }
 
-func (f FileWriter) createFile(post *client.Post, shouldBundle bool, filenameTemplate string) (PostFile, error) {
+func (f FileWriter) createFile(post *client.Post) (PostFile, error) {
 	var postFile PostFile
 
-	outputFilename, err := formatFilename(post, filenameTemplate)
+	shouldBundle := len(post.AllMedia()) > 0
+	outputFilename, err := f.formatFilename(post)
 	extension := filepath.Ext(outputFilename)
 
 	if extension == "" {

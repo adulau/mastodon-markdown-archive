@@ -41,7 +41,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	fileWriter, err := files.New(*dist)
+	fileWriter, err := files.New(*dist, *templateFile, *filenameTemplate)
 	posts := c.Posts()
 	postsCount := len(posts)
 
@@ -52,7 +52,7 @@ func main() {
 			continue
 		}
 
-		if err := fileWriter.Write(post, *templateFile, *filenameTemplate); err != nil {
+		if err := fileWriter.Write(post); err != nil {
 			log.Panicln("error writing post to file: %w", err)
 			break
 		}
