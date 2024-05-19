@@ -26,6 +26,7 @@ func main() {
 	threaded := flag.Bool("threaded", false, "Thread replies for a post in a single file")
 	filenameTemplate := flag.String("filename", "", "Template for post filename")
 	porcelain := flag.Bool("porcelain", false, "Prints the amount of fetched posts to stdout in a parsable manner")
+	downloadMedia := flag.String("download-media", "", "Download media in a post. Omit or pass an empty string to not download media. Pass 'bundle' to download the media inline in a single directory with its original post. Pass a path to a directory to download all media there.")
 
 	flag.Parse()
 
@@ -42,7 +43,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	fileWriter, err := files.New(*dist, *templateFile, *filenameTemplate)
+	fileWriter, err := files.New(*dist, *templateFile, *filenameTemplate, *downloadMedia)
 	posts := c.Posts()
 	postsCount := len(posts)
 

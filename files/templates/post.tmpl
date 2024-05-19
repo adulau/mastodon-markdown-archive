@@ -22,7 +22,11 @@ descendants:
 
 {{ range .Post.MediaAttachments }}
 {{- if eq .Type "image" }}
-![{{ .Description }}]({{ .Path }})
+{{- if .Path }}
+![{{ .Description }}]({{ osBase .Path }})
+{{- else }}
+![{{ .Description }}]({{ .URL }})
+{{- end }}
 {{ end }}
 {{- end -}}
 
@@ -30,7 +34,11 @@ descendants:
 {{ .Content | toMarkdown }}
 {{ range .MediaAttachments }}
 {{- if eq .Type "image" }}
-![{{ .Description }}]({{ .Path }})
+{{- if .Path }}
+![{{ .Description }}]({{ osBase .Path }})
+{{- else }}
+![{{ .Description }}]({{ .URL }})
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

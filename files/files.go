@@ -24,6 +24,7 @@ type FileWriter struct {
 	dir              string
 	templateFile     string
 	filenameTemplate string
+	downloadMedia    string
 }
 
 type TemplateContext struct {
@@ -47,7 +48,7 @@ type PostFile struct {
 	File *os.File
 }
 
-func New(dir string, templateFile string, filenameTemplate string) (FileWriter, error) {
+func New(dir, templateFile, filenameTemplate, downloadMedia string) (FileWriter, error) {
 	var fileWriter FileWriter
 	_, err := os.Stat(dir)
 
@@ -65,6 +66,7 @@ func New(dir string, templateFile string, filenameTemplate string) (FileWriter, 
 		dir:              absDir,
 		templateFile:     templateFile,
 		filenameTemplate: filenameTemplate,
+		downloadMedia:    downloadMedia,
 	}, nil
 }
 
@@ -76,18 +78,32 @@ func (f *FileWriter) Write(post *client.Post) error {
 	}
 	defer postFile.File.Close()
 
-	if len(post.MediaAttachments) > 0 {
-		err = downloadAttachments(post.MediaAttachments, postFile.Dir)
-		if err != nil {
-			return err
-		}
-	}
+	if f.downloadMedia != "" && len(post.AllMedia()) > 0 {
+		var mediaDir string
 
-	for _, descendant := range post.Descendants() {
-		if len(descendant.MediaAttachments) > 0 {
-			err = downloadAttachments(descendant.MediaAttachments, postFile.Dir)
+		if f.downloadMedia == "bundle" {
+			mediaDir = postFile.Dir
+		} else {
+			_, err := os.Stat(f.downloadMedia)
+			if os.IsNotExist(err) {
+				os.Mkdir(f.downloadMedia, os.ModePerm)
+			}
+			mediaDir = f.downloadMedia
+		}
+
+		if len(post.MediaAttachments) > 0 {
+			err = downloadAttachments(post.MediaAttachments, mediaDir)
 			if err != nil {
 				return err
+			}
+		}
+
+		for _, descendant := range post.Descendants() {
+			if len(descendant.MediaAttachments) > 0 {
+				err = downloadAttachments(descendant.MediaAttachments, mediaDir)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -131,9 +147,9 @@ func (f *FileWriter) formatFilename(post *client.Post) (string, error) {
 func (f FileWriter) createFile(post *client.Post) (PostFile, error) {
 	var postFile PostFile
 
-	shouldBundle := len(post.AllMedia()) > 0
 	outputFilename, err := f.formatFilename(post)
 	extension := filepath.Ext(outputFilename)
+	shouldBundle := f.downloadMedia == "bundle" && len(post.AllMedia()) > 0
 
 	if extension == "" {
 		extension = ".md"
@@ -192,20 +208,26 @@ func downloadAttachments(attachments []client.MediaAttachment, dir string) error
 			continue
 		}
 
-		imageFilename, err := downloadAttachment(dir, media.Id, media.URL)
+		imageFile, err := downloadAttachment(dir, media.Id, media.URL)
 
 		if err != nil {
 			return err
 		}
 
-		media.Path = imageFilename
+		absImageFile, err := filepath.Abs(imageFile.Name())
+
+		if err != nil {
+			return err
+		}
+
+		media.Path = absImageFile
 	}
 
 	return nil
 }
 
-func downloadAttachment(dir string, id string, url string) (string, error) {
-	var filename string
+func downloadAttachment(dir string, id string, url string) (*os.File, error) {
+	var file *os.File
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
@@ -213,7 +235,7 @@ func downloadAttachment(dir string, id string, url string) (string, error) {
 	res, err := client.Do(req)
 
 	if err != nil {
-		return filename, err
+		return file, err
 	}
 
 	defer res.Body.Close()
@@ -222,7 +244,7 @@ func downloadAttachment(dir string, id string, url string) (string, error) {
 	extensions, err := mime.ExtensionsByType(contentType)
 
 	if err != nil {
-		return filename, err
+		return file, err
 	}
 
 	var extension string
@@ -236,24 +258,24 @@ func downloadAttachment(dir string, id string, url string) (string, error) {
 	}
 
 	if extension == "" {
-		return filename, fmt.Errorf("could not match extension for media")
+		return file, fmt.Errorf("could not match extension for media")
 	}
 
-	filename = fmt.Sprintf("%s%s", id, extension)
-	file, err := os.Create(filepath.Join(dir, filename))
+	filename := fmt.Sprintf("%s%s", id, extension)
+	file, err = os.Create(filepath.Join(dir, filename))
 
 	if err != nil {
-		return filename, err
+		return file, err
 	}
 
 	defer file.Close()
 	_, err = io.Copy(file, res.Body)
 
 	if err != nil {
-		return filename, err
+		return file, err
 	}
 
-	return filename, nil
+	return file, nil
 }
 
 func resolveTemplate(templateFile string) (*template.Template, error) {

@@ -4,8 +4,6 @@ Fetch a Mastodon account's posts and save them as markdown files. Post content i
 
 Implements most of the parameters in Mastodon's public [API to get an account's statuses](https://docs.joinmastodon.org/methods/accounts/#statuses).
 
-If a post has images, the post is created as a bundle of files in the manner of Hugo [page bundles](https://gohugo.io/content-management/page-bundles/), and the images are downloaded in the corresponding directory.
-
 I use this tool to create an [archive of my Mastodon posts](https://garrido.io/microblog/), which I then syndicate to my own site following [PESOS](https://indieweb.org/PESOS).
 
 ## Install
@@ -19,6 +17,8 @@ You can clone this repo and run `go build main.go` in the repository's directory
 Usage of mastodon-markdown-archive:
   -dist string
         Path to directory where files will be written (default "./posts")
+  -download-media string
+        Download media in a post. Omit or pass an empty string to not download media. Pass 'bundle' to download the media inline in a single directory with its original post. Pass a path to a directory to download all media there.
   -exclude-reblogs
         Exclude reblogs
   -exclude-replies
@@ -45,6 +45,7 @@ Usage of mastodon-markdown-archive:
         Thread replies for a post in a single file
   -user string
         URL of Mastodon account whose toots will be fetched
+
 ```
 
 ## Example
@@ -247,3 +248,17 @@ For both the post and filename templates, the following functions and variables 
 
 #### Variables
 * [Post](https://pkg.go.dev/git.garrido.io/gabriel/mastodon-markdown-archive/client#Post)
+
+## Post media
+
+By default, a post's media is not downloaded. Use the `--download-media` flag with a path to download a post's media. The post's original file is downloaded, and the image's id is used as the filename. 
+
+For example, `--download-media=./images` saves any media to the `./images`.
+
+Once downloaded, the media's path is available in [MediaAttachment.Path](https://pkg.go.dev/git.garrido.io/gabriel/mastodon-markdown-archive/client#MediaAttachment) as an absolute path.
+
+Sprig's [path](https://masterminds.github.io/sprig/paths.html) functions can be used in the templates to manipulate the path as necessary. For example, the default template uses `osBase` to get the last element of the filepath.  
+
+You can use `--download-media=bundle` to save the post media in a single directory with its original post. In this case, the post's filename will be used as the directory name and the post filename will be `index.{extension}`. This is done specifically to support Hugo [page bundles](https://gohugo.io/content-management/page-bundles).
+
+For example, `--download-media="./bundle" --filename='{{ .Post.CreatedAt | date "2006-01-02" }}-{{.Post.Id}}.md'` will create a `YYYY-MM-DD-<post id>/` directory, with the post saved as `YYYY-MM-DD-<post id>/index.md` and media saved as `YYYY-MM-DD-<post id>/<media id>.<media ext>`.
