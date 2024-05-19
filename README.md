@@ -20,7 +20,7 @@ This program essentially wraps the Mastodon API with a command line interface wi
 I use this tool to create an archive of my Mastodon posts and [syndicate them to my own site](https://garrido.io/microblog/), per IndieWeb's [PESOS philosophy](https://indieweb.org/PESOS).
 
 ## Table of contents
-* [Installation](Installation)
+* [Installation](#installation)
 * [Usage](#usage)
   * [Environment variables](#environment-variables)
 * [Examples](#examples)
