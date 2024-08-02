@@ -17,7 +17,9 @@ This program essentially wraps the Mastodon API with a command line interface wi
 - Optionally set authorization token to fetch private posts
 
 
-I use this tool to create an archive of my Mastodon posts and [syndicate them to my own site](https://garrido.io/microblog/), per IndieWeb's [PESOS philosophy](https://indieweb.org/PESOS).
+I use this tool to create an archive of my Mastodon posts and [syndicate them to my own site](https://garrido.io/microblog/), per IndieWeb's [PESOS philosophy](https://indieweb.org/PESOS). [Read more about this](https://garrido.io/notes/archiving-and-syndicating-mastodon-posts/) on my site.
+
+This repository [is mirrored in Codeberg](https://codeberg.org/ggpsv/mastodon-markdown-archive). For any issues or questions, please [contact me via email](mailto:hello@garrido.io?subject="Re:mastodon-markdown-archive") or [Mastodon](https://social.coop/@ggpsv).
 
 ## Table of contents
 * [Installation](#installation)
