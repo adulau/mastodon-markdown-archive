@@ -125,6 +125,10 @@ func (c *Client) buildOrphans() error {
 
 			for i := range statusContext.Ancestors[1:] {
 				post := statusContext.Ancestors[i+1]
+				if post.Account.Id != c.account.Id {
+					continue
+				}
+
 				c.postIdMap[post.Id] = &post
 				top.descendants = append(top.descendants, &post)
 			}
