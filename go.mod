@@ -2,12 +2,14 @@ module git.garrido.io/gabriel/mastodon-markdown-archive
 
 go 1.21.6
 
-require github.com/JohannesKaufmann/html-to-markdown v1.5.0
+require (
+	github.com/JohannesKaufmann/html-to-markdown v1.5.0
+	github.com/Masterminds/sprig/v3 v3.2.3
+)
 
 require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
-	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/google/uuid v1.1.1 // indirect

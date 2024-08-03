@@ -16,13 +16,13 @@ This program essentially wraps the Mastodon API with a command line interface wi
 - Optionally persist fetched post id cursors
 - Optionally set authorization token to fetch private posts
 
-
 I use this tool to create an archive of my Mastodon posts and [syndicate them to my own site](https://garrido.io/microblog/), per IndieWeb's [PESOS philosophy](https://indieweb.org/PESOS). [Read more about this](https://garrido.io/notes/archiving-and-syndicating-mastodon-posts/) on my site.
 
 This repository [is mirrored in Codeberg](https://codeberg.org/ggpsv/mastodon-markdown-archive). For any issues or questions, please [contact me via email](mailto:hello@garrido.io?subject=Re:mastodon-markdown-archive) or [Mastodon](https://social.coop/@ggpsv).
 
 ## Table of contents
 * [Installation](#installation)
+* [Dependencies](#dependencies)
 * [Usage](#usage)
   * [Environment variables](#environment-variables)
 * [Examples](#examples)
@@ -43,12 +43,21 @@ This repository [is mirrored in Codeberg](https://codeberg.org/ggpsv/mastodon-ma
     * [Text only](#text-only)
 * [Post media](#post-media)
   * [Bundling](#bundling)
+* [Known issues](#known-issues)
 
 ## Installation
 
 [Go](https://go.dev/doc/install) is required for installation.
 
 You can clone this repo and run `go build main.go` in the repository's directory, or you can run `go install git.garrido.io/gabriel/mastodon-markdown-archive@latest` to install a binary of the latest version.
+
+## Dependencies
+
+This tool has only two direct dependencies, which are included to provide useful, though largely optional, functionality in templates:
+- [sprig](https://github.com/Masterminds/sprig/tree/master)
+- [html-to-markdown](https://github.com/JohannesKaufmann/html-to-markdown/tree/master)
+
+The default template makes use of `html-to-markdown` to transform the post's HTML content to markdown.
 
 ## Usage
 ```
@@ -383,3 +392,7 @@ You can use `--download-media=bundle` to save the post media in a single directo
 For example, `--download-media="bundle" --filename='{{ .Post.CreatedAt | date "2006-01-02" }}-{{.Post.Id}}.md'` will create a `YYYY-MM-DD-<post id>/` directory, with the post saved as `YYYY-MM-DD-<post id>/index.md` and media saved as `YYYY-MM-DD-<post id>/<media id>.<media ext>`.
 
 This is done specifically to support Hugo [page bundles](https://gohugo.io/content-management/page-bundles).
+
+### Known issues
+
+1. A reply post may still appear in the list of posts despite using `--exclude-replies`. This happens when the post in question is a reply to a post that has since been deleted. It looks like Mastodon's API stops treating the reply as a reply. It no longer points to another post, and thus is not affected by the `exclude_replies` parameter.
