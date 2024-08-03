@@ -114,15 +114,25 @@ func (c *Client) buildOrphans() error {
 			return err
 		}
 
-		top := statusContext.Ancestors[0]
+		var top Post;
 
-		for i := range statusContext.Ancestors[1:] {
-			post := statusContext.Ancestors[i+1]
-			c.postIdMap[post.Id] = &post
-			top.descendants = append(top.descendants, &post)
+		// When building a thread from the status context endpoint, 
+		// start from the greatest ancestor and add the other ancestors
+		// below it as descendants.
+		// Otherwise, use the orphan as the start. 
+		if len(statusContext.Ancestors) > 0 {
+			top = statusContext.Ancestors[0]
+
+			for i := range statusContext.Ancestors[1:] {
+				post := statusContext.Ancestors[i+1]
+				c.postIdMap[post.Id] = &post
+				top.descendants = append(top.descendants, &post)
+			}
+
+			top.descendants = append(top.descendants, c.postIdMap[postId])
+		} else {
+			top = *c.postIdMap[postId]
 		}
-
-		top.descendants = append(top.descendants, c.postIdMap[postId])
 
 		for i := range statusContext.Descendants {
 			post := statusContext.Descendants[i]

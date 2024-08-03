@@ -43,7 +43,7 @@ func main() {
 		MinId:          *minId,
 		OnlyMedia:      *onlyMedia,
 		Pinned:         *pinned,
-		Tagged: *tagged,
+		Tagged:         *tagged,
 	}, client.ClientOptions{
 		Threaded:   *threaded,
 		Visibility: *visibility,
