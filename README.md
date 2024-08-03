@@ -393,6 +393,6 @@ For example, `--download-media="bundle" --filename='{{ .Post.CreatedAt | date "2
 
 This is done specifically to support Hugo [page bundles](https://gohugo.io/content-management/page-bundles).
 
-### Known issues
+## Known issues
 
 1. A reply post may still appear in the list of posts despite using `--exclude-replies`. This happens when the post in question is a reply to a post that has since been deleted. It looks like Mastodon's API stops treating the reply as a reply. It no longer points to another post, and thus is not affected by the `exclude_replies` parameter.
