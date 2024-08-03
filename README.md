@@ -307,6 +307,22 @@ For both the post and filename templates, the following functions and variables 
 * `toMarkdown` to convert the post's HTML content to Markdown, without escaping any markdown syntax
 * `toMarkdownEscaped` to convert the post's HTML content to Markdown, escaping any markdown syntax
 
+Sprig is particularly useful for arbitrary customization, such as [string manipulation](https://masterminds.github.io/sprig/strings.html). 
+
+For example, let's assume we want to convert the casing of the tags from Mastodon. The [default template](files/templates/post.tmpl) passes the tags as-is, but we want them in kebab-case. You would need to create a custom template, and use the `kebabcase` function where the tags are rendered:
+
+```
+---
+date: {{ .Post.CreatedAt }}
+tags:
+{{- range .Post.AllTags }}
+  - {{ .Name | kebabcase }}
+{{- end }}
+---
+```
+
+You would keep this file somewhere, and pass its path to the `--template` argument when invoking the tool.
+
 #### Variables
 * [Post](https://pkg.go.dev/git.garrido.io/gabriel/mastodon-markdown-archive/client#Post)
 
