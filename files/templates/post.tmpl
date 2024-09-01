@@ -23,9 +23,9 @@ descendants:
 {{ range .Post.MediaAttachments }}
 {{- if eq .Type "image" }}
 {{- if .Path }}
-![{{ .Description }}]({{ osBase .Path }})
+![{{ .Description | replace "\n" "" }}]({{ osBase .Path }})
 {{- else }}
-![{{ .Description }}]({{ .URL }})
+![{{ .Description | replace "\n" "" }}]({{ .URL }})
 {{- end }}
 {{ end }}
 {{- end -}}
@@ -35,9 +35,9 @@ descendants:
 {{ range .MediaAttachments }}
 {{- if eq .Type "image" }}
 {{- if .Path }}
-![{{ .Description }}]({{ osBase .Path }})
+![{{ .Description | replace "\n" "" }}]({{ osBase .Path }})
 {{- else }}
-![{{ .Description }}]({{ .URL }})
+![{{ .Description | replace "\n" ""}}]({{ .URL }})
 {{- end }}
 {{- end }}
 {{- end }}
