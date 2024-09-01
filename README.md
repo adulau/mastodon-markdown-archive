@@ -24,7 +24,7 @@ It is likely that I have not considered all possible use cases, or that I've bee
 
 ## Table of contents
 * [Installation](#installation)
-  * [From Source](#from-source)
+  * [From source](#from-source)
   * [Container](#container)
 * [Dependencies](#dependencies)
 * [Usage](#usage)
