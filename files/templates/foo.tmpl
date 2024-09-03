@@ -1,0 +1,46 @@
+---
+date: {{ .Post.CreatedAt }}
+{{- if .Post.InReplyToId }}
+in_reply_to: {{ .Post.InReplyToId }}
+{{- end }}
+post_uri: {{ .Post.URI }}
+post_id: {{ .Post.Id }}
+{{- if len .Post.AllTags }}
+tags:
+{{- range .Post.AllTags }}
+- {{ .Name }}
+{{- end }}
+{{- end }}
+{{- if len .Post.Descendants }}
+descendants:
+{{- range .Post.Descendants }}
+- {{ .Id }}
+{{- end }}
+{{- end }}
+layout: page
+title: paperbay.org Mastodon - {{ .Post.URI }}
+---
+{{ .Post.Content | toMarkdown }}
+
+{{ range .Post.MediaAttachments }}
+{{- if eq .Type "image" }}
+{{- if .Path }}
+![{{ .Description | replace "\n" "" }}]({{ osBase .Path }})
+{{- else }}
+![{{ .Description | replace "\n" "" }}]({{ .URL }})
+{{- end }}
+{{ end }}
+{{- end -}}
+
+{{ range .Post.Descendants }}
+{{ .Content | toMarkdown }}
+{{ range .MediaAttachments }}
+{{- if eq .Type "image" }}
+{{- if .Path }}
+![{{ .Description | replace "\n" ""}}]({{ osBase .Path }})
+{{- else }}
+![{{ .Description | replace "\n" ""}}]({{ .URL }})
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
