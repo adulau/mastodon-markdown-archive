@@ -1,6 +1,7 @@
 module git.garrido.io/gabriel/mastodon-markdown-archive
 
 go 1.21.6
+toolchain go1.23.7
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.5.0
@@ -19,6 +20,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 )
